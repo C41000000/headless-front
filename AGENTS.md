@@ -78,7 +78,7 @@ Consequências:
 
 | Contexto | Base | Exemplos |
 | :--- | :--- | :--- |
-| Central | `/api/v1` | `auth/login`, `users`, `tenants`, `tenants/{uuid}/domains` |
+| Central | `/api/v1` | `auth/login`, `auth/me`, `users`, `tenants`, `tenants/{uuid}/domains` |
 | Tenant público | `/api/v1` | `visual-identity`, `banners?placement=home` |
 | Tenant autenticado | `/api/v1` | `users`, `admin/visual-identity`, `admin/banners` |
 

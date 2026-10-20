@@ -1,0 +1,147 @@
+// Estilos compartilhados pelas páginas de criação e edição de usuário.
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--app-text-strong);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.page-header {
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--app-text-strong);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: var(--app-text-muted);
+    margin: 0;
+  }
+}
+
+.form-card {
+  border-radius: 12px;
+  background-color: var(--app-surface);
+  padding: 1rem;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.readonly-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background-color: var(--app-surface-muted);
+  color: var(--app-text-secondary);
+  font-size: 0.875rem;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.role-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--app-surface-muted);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--app-text-strong);
+    margin: 0;
+  }
+
+  .role-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+  }
+
+  .role-label {
+    font-weight: 500;
+  }
+
+  .role-hint {
+    margin-left: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--app-text-faint);
+  }
+
+  .role-description {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--app-text-secondary);
+
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--app-text-muted);
+    }
+  }
+
+  .field-error {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--app-danger);
+  }
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border-subtle);
+
+  .submit-btn {
+    height: 44px;
+    padding: 0 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .spinner-inline {
+    display: inline-block;
+  }
+}

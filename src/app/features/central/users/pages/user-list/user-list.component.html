@@ -1,0 +1,197 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Usuários</h1>
+      <p class="page-subtitle">Equipe com acesso ao painel central e seus papéis</p>
+    </div>
+
+    @if (canCreate()) {
+      <a mat-flat-button color="primary" routerLink="/admin/users/new" class="create-btn">
+        <mat-icon>add</mat-icon>
+        <span>Novo Usuário</span>
+      </a>
+    }
+  </div>
+
+  <mat-card class="table-card" appearance="outlined">
+    <div class="filters-toolbar">
+      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-icon matPrefix class="search-icon">search</mat-icon>
+        <input
+          matInput
+          type="text"
+          placeholder="Buscar por nome ou e-mail..."
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+        @if (searchTerm()) {
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="searchTerm.set('')"
+            matTooltip="Limpar busca"
+            aria-label="Limpar busca"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Papel</mat-label>
+        <mat-select [value]="roleFilter()" (valueChange)="onRoleFilterChange($event)">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (role of roles; track role.value) {
+            <mat-option [value]="role.value">{{ role.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="statusFilter()" (valueChange)="onStatusFilterChange($event)">
+          <mat-option value="all">Todos</mat-option>
+          <mat-option value="active">Ativos</mat-option>
+          <mat-option value="inactive">Inativos</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="users()" class="mat-elevation-z0 data-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef class="col-name">Usuário</th>
+          <td mat-cell *matCellDef="let user" class="col-name">
+            <div class="user-info" [class.inactive]="!user.is_active">
+              <span class="user-name">
+                @if (user.abilities?.update) {
+                  <a [routerLink]="['/admin/users', user.uuid]">{{ user.name }}</a>
+                } @else {
+                  {{ user.name }}
+                }
+                @if (user.uuid === currentUserUuid()) {
+                  <span class="self-tag">você</span>
+                }
+              </span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef class="col-role">Papel</th>
+          <td mat-cell *matCellDef="let user" class="col-role">{{ roleLabel(user.role) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="col-status">Status</th>
+          <td mat-cell *matCellDef="let user" class="col-status">
+            @if (user.abilities?.toggle_status) {
+              <mat-slide-toggle
+                [checked]="user.is_active"
+                [disabled]="busyUuid() === user.uuid"
+                (change)="onToggleStatus(user, $event)"
+                [attr.aria-label]="(user.is_active ? 'Desativar ' : 'Reativar ') + user.name"
+                [matTooltip]="user.is_active ? 'Desativar usuário' : 'Reativar usuário'"
+                class="app-switch"
+                hideIcon
+              >
+                {{ user.is_active ? 'Ativo' : 'Inativo' }}
+              </mat-slide-toggle>
+            } @else {
+              <span class="status" [class.inactive]="!user.is_active">
+                <span class="status-dot"></span>
+                {{ user.is_active ? 'Ativo' : 'Inativo' }}
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef class="col-date">Criado em</th>
+          <td mat-cell *matCellDef="let user" class="col-date text-muted">
+            {{ user.created_at | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">Ações</th>
+          <td mat-cell *matCellDef="let user" class="col-actions">
+            @if (hasAnyAbility(user)) {
+              <div class="actions-group">
+                @if (user.abilities?.update) {
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/admin/users', user.uuid]"
+                    matTooltip="Editar usuário"
+                    [attr.aria-label]="'Editar ' + user.name"
+                    class="action-icon-btn edit-btn"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </a>
+                }
+                @if (user.abilities?.delete) {
+                  <button
+                    mat-icon-button
+                    [disabled]="busyUuid() === user.uuid"
+                    (click)="onDelete(user)"
+                    matTooltip="Excluir usuário"
+                    [attr.aria-label]="'Excluir ' + user.name"
+                    class="action-icon-btn delete-btn"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            } @else {
+              <mat-icon
+                class="locked-icon"
+                [matTooltip]="
+                  user.uuid === currentUserUuid()
+                    ? 'Você não pode alterar a própria conta por aqui'
+                    : 'Sem permissão para gerenciar este usuário'
+                "
+                >lock_outline</mat-icon
+              >
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="user-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-table" [attr.colspan]="displayedColumns.length">
+            @if (!isLoading()) {
+              <div class="empty-state">
+                <mat-icon class="empty-icon">person_search</mat-icon>
+                @if (hasFilters()) {
+                  <p>Nenhum usuário encontrado com esses filtros.</p>
+                  <button mat-button (click)="clearFilters()">Limpar filtros</button>
+                } @else {
+                  <p>Nenhum usuário cadastrado.</p>
+                }
+              </div>
+            }
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    @if (meta(); as m) {
+      <mat-paginator
+        [length]="m.total"
+        [pageSize]="m.per_page"
+        [pageIndex]="m.current_page - 1"
+        [hidePageSize]="true"
+        (page)="onPageChange($event)"
+        aria-label="Selecionar página de usuários"
+      >
+      </mat-paginator>
+    }
+  </mat-card>
+</div>

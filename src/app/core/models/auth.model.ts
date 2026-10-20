@@ -12,9 +12,9 @@ export interface LoginCredentialsDto {
   password: string;
 }
 
-export interface LoginResponseDto {
+export interface LoginResponseDto<TUser extends AuthUserDto = AuthUserDto> {
   access_token: string;
   token_type: string;
   expires_in: number;
-  user: AuthUserDto;
+  user: TUser;
 }

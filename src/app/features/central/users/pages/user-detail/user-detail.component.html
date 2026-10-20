@@ -1,0 +1,111 @@
+<div class="page-container">
+  <div class="breadcrumb">
+    <a mat-button routerLink="/admin/users">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Voltar para Usuários</span>
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando usuário...</span>
+    </div>
+  } @else if (user(); as u) {
+    <div class="page-header">
+      <h1 class="page-title">{{ u.name }}</h1>
+      <p class="page-subtitle">
+        {{ u.is_active ? 'Ativo' : 'Inativo' }} • Criado em
+        {{ u.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em
+        {{ u.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+
+    <mat-card class="form-card" appearance="outlined">
+      <mat-card-content>
+        @if (!canUpdate()) {
+          <p class="readonly-notice">
+            <mat-icon>lock_outline</mat-icon>
+            <span>Você pode ver este usuário, mas não pode editá-lo.</span>
+          </p>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="user-form">
+          <div class="fields-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nome</mat-label>
+              <input matInput formControlName="name" autocomplete="off" />
+              <mat-icon matPrefix>person</mat-icon>
+              @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
+                <mat-error>O nome é obrigatório.</mat-error>
+              }
+              @if (validationErrors()['name']) {
+                <mat-error>{{ validationErrors()['name'][0] }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>E-mail</mat-label>
+              <input matInput type="email" formControlName="email" autocomplete="off" />
+              <mat-icon matPrefix>mail_outline</mat-icon>
+              @if (form.controls.email.touched && form.controls.email.errors?.['required']) {
+                <mat-error>O e-mail é obrigatório.</mat-error>
+              } @else if (form.controls.email.touched && form.controls.email.errors?.['email']) {
+                <mat-error>Informe um e-mail válido.</mat-error>
+              }
+              @if (validationErrors()['email']) {
+                <mat-error>{{ validationErrors()['email'][0] }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <section class="role-section">
+            <h3 class="section-title">Papel</h3>
+            <mat-radio-group formControlName="role" class="role-options" aria-label="Papel">
+              @for (role of roles; track role.value) {
+                <mat-radio-button [value]="role.value" [disabled]="role.level > ownLevel()">
+                  <span class="role-label">{{ role.label }}</span>
+                  @if (role.level > ownLevel()) {
+                    <span class="role-hint">acima do seu papel</span>
+                  }
+                </mat-radio-button>
+              }
+            </mat-radio-group>
+            <p class="role-description">
+              <mat-icon>info_outline</mat-icon>
+              <span>
+                @if (isSelf()) {
+                  Você não pode alterar o seu próprio papel.
+                }
+                {{ roleDescription(form.controls.role.value) }}
+              </span>
+            </p>
+            @if (validationErrors()['role']) {
+              <p class="field-error">{{ validationErrors()['role'][0] }}</p>
+            }
+          </section>
+
+          @if (canUpdate()) {
+            <div class="form-actions">
+              <a mat-button routerLink="/admin/users">Cancelar</a>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="isSaving()"
+                class="submit-btn"
+              >
+                @if (isSaving()) {
+                  <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                } @else {
+                  <mat-icon>check</mat-icon>
+                }
+                <span>{{ isSaving() ? 'Salvando...' : 'Salvar Alterações' }}</span>
+              </button>
+            </div>
+          }
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

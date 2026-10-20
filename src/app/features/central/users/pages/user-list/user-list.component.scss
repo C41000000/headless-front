@@ -1,0 +1,248 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--app-text-strong);
+    margin: 0 0 0.25rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: var(--app-text-muted);
+    margin: 0;
+  }
+
+  .create-btn {
+    border-radius: 8px;
+    height: 42px;
+    font-weight: 500;
+  }
+}
+
+.table-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+
+.filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem 0.5rem 1.25rem;
+  background-color: var(--app-surface);
+
+  .search-field {
+    flex: 1 1 280px;
+    max-width: 420px;
+
+    .search-icon {
+      color: var(--app-text-muted);
+      margin-right: 4px;
+    }
+  }
+
+  .filter-field {
+    width: 160px;
+  }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    color: var(--app-text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: var(--app-surface-muted);
+    border-bottom: 1px solid var(--app-border);
+    padding: 1rem 1.25rem;
+  }
+
+  td.mat-mdc-cell {
+    font-size: 0.9rem;
+    color: var(--app-text);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--app-border-subtle);
+  }
+
+  .user-row {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--app-surface-muted);
+    }
+  }
+
+  .col-name {
+    min-width: 240px;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    .user-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--app-text-strong);
+      font-weight: 600;
+      font-size: 0.95rem;
+
+      a {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .user-email {
+      font-size: 0.8rem;
+      color: var(--app-text-muted);
+    }
+
+    &.inactive .user-name {
+      color: var(--app-text-faint);
+    }
+  }
+
+  .self-tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--app-text-secondary);
+    border: 1px solid var(--app-border-strong);
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    line-height: 1.4;
+  }
+
+  .col-role {
+    min-width: 120px;
+    white-space: nowrap;
+  }
+
+  .col-status {
+    min-width: 100px;
+    white-space: nowrap;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--app-text);
+    }
+
+    &.inactive {
+      color: var(--app-text-faint);
+
+      .status-dot {
+        background-color: transparent;
+        border: 1.5px solid var(--app-text-faint);
+      }
+    }
+  }
+
+  .col-date {
+    min-width: 160px;
+    white-space: nowrap;
+  }
+
+  .text-muted {
+    color: var(--app-text-muted);
+  }
+
+  .col-actions {
+    min-width: 120px;
+    white-space: nowrap;
+  }
+
+  // Margem negativa compensa o padding do mat-icon-button para o primeiro ícone
+  // ficar alinhado ao título "Ações".
+  .actions-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: -8px;
+
+    .action-icon-btn {
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .edit-btn {
+      color: var(--app-text-strong);
+    }
+
+    .delete-btn:not([disabled]) {
+      color: var(--app-danger);
+    }
+  }
+
+  .locked-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--app-text-faint);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--app-border-strong);
+  }
+
+  p {
+    margin: 0;
+    color: var(--app-text-muted);
+    font-size: 1rem;
+  }
+}

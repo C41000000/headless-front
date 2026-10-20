@@ -40,6 +40,8 @@ describe('CentralAuthService', () => {
         name: 'Super Admin',
         email: 'admin@example.com',
         is_active: true,
+        role: 'super-admin',
+        permissions: ['users.view', 'users.create'],
         created_at: '2026-10-20T10:00:00Z',
         updated_at: '2026-10-20T10:00:00Z',
       },
@@ -50,11 +52,36 @@ describe('CentralAuthService', () => {
       expect(service.currentUser()?.name).toBe('Super Admin');
       expect(service.isAuthenticated()).toBe(true);
       expect(tokenService.centralToken()).toBe('jwt-token-123');
+      expect(service.can('users.create')).toBe(true);
+      expect(service.can('users.delete')).toBe(false);
     });
 
     const req = httpMock.expectOne('/api/v1/auth/login');
     expect(req.request.method).toBe('POST');
     req.flush(mockResponse);
+  });
+
+  it('should load the current user only once', () => {
+    const me = {
+      uuid: 'user-uuid-1',
+      name: 'Funcionária',
+      email: 'func@example.com',
+      is_active: true,
+      role: 'employee',
+      permissions: ['users.view'],
+      created_at: '',
+      updated_at: '',
+    };
+
+    service.loadCurrentUser().subscribe();
+    service.loadCurrentUser().subscribe((user) => {
+      expect(user.role).toBe('employee');
+    });
+
+    httpMock.expectOne('/api/v1/auth/me').flush(me);
+
+    expect(service.can('users.view')).toBe(true);
+    expect(service.can('users.create')).toBe(false);
   });
 
   it('should clear token and user state on logout', () => {

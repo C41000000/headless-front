@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { TenantContextService } from '@core/tenant';
 import { centralAuthGuard } from './features/central/auth/guards/central-auth.guard';
 import { centralGuestGuard } from './features/central/auth/guards/central-guest.guard';
+import { centralPermissionGuard } from './features/central/users/guards/central-permission.guard';
 import { tenantAuthGuard } from './features/tenant/auth/guards/tenant-auth.guard';
 import { tenantGuestGuard } from './features/tenant/auth/guards/tenant-guest.guard';
 
@@ -50,6 +51,30 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/central/tenants/pages/tenant-detail/tenant-detail.component').then(
             (m) => m.TenantDetailComponent,
+          ),
+      },
+      {
+        path: 'users',
+        canActivate: [centralPermissionGuard('users.view')],
+        loadComponent: () =>
+          import('./features/central/users/pages/user-list/user-list.component').then(
+            (m) => m.UserListComponent,
+          ),
+      },
+      {
+        path: 'users/new',
+        canActivate: [centralPermissionGuard('users.create')],
+        loadComponent: () =>
+          import('./features/central/users/pages/user-create/user-create.component').then(
+            (m) => m.UserCreateComponent,
+          ),
+      },
+      {
+        path: 'users/:uuid',
+        canActivate: [centralPermissionGuard('users.view')],
+        loadComponent: () =>
+          import('./features/central/users/pages/user-detail/user-detail.component').then(
+            (m) => m.UserDetailComponent,
           ),
       },
     ],
