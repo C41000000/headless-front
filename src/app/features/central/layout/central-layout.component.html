@@ -1,0 +1,29 @@
+<div class="admin-layout">
+  <header class="top-nav">
+    <div class="nav-brand">
+      <span class="brand-badge">Central</span>
+      <span class="brand-title">Headless Admin</span>
+    </div>
+
+    <nav class="nav-links">
+      <a routerLink="/admin/tenants" routerLinkActive="active" class="nav-item">Tenants</a>
+    </nav>
+
+    <div class="nav-user">
+      @if (authService.currentUser(); as user) {
+        <div class="user-info">
+          <span class="user-name">{{ user.name }}</span>
+          <span class="user-email">{{ user.email }}</span>
+        </div>
+      }
+
+      <button type="button" class="btn-logout" (click)="onLogout()">
+        Sair
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

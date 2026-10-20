@@ -1,0 +1,97 @@
+<div class="page-container">
+  <div class="breadcrumb">
+    <a routerLink="/admin/tenants">← Voltar para Tenants</a>
+  </div>
+
+  <div class="page-header">
+    <h1>Cadastrar Novo Tenant</h1>
+    <p>Criação do cliente, provisionamento automático do banco de dados e configuração de domínios</p>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-group">
+        <label for="name">Nome da Empresa / Cliente</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Ex: Empresa Acme Ltda."
+          [class.is-invalid]="(form.controls.name.touched && form.controls.name.invalid) || validationErrors()['name']"
+        />
+
+        @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
+          <span class="field-error">O nome do tenant é obrigatório.</span>
+        }
+        @if (validationErrors()['name']) {
+          <span class="field-error">{{ validationErrors()['name'][0] }}</span>
+        }
+      </div>
+
+      <div class="domains-section">
+        <div class="domains-header">
+          <div>
+            <label class="section-label">Domínios de Acesso</label>
+            <span class="section-hint">Ao menos um hostname completo que identificará o tenant. Ex: <code>empresa.app.com</code></span>
+          </div>
+
+          <button type="button" class="btn-secondary" (click)="addDomainField()">
+            + Adicionar Outro Domínio
+          </button>
+        </div>
+
+        @if (validationErrors()['domains']) {
+          <span class="field-error">{{ validationErrors()['domains'][0] }}</span>
+        }
+
+        <div formArrayName="domains" class="domains-list">
+          @for (control of domainsArray.controls; track $index) {
+            <div class="domain-input-row">
+              <div class="input-with-error">
+                <input
+                  type="text"
+                  [formControlName]="$index"
+                  placeholder="ex: cliente.app.com ou empresa.localhost"
+                  [class.is-invalid]="(control.touched && control.invalid) || validationErrors()['domains.' + $index]"
+                />
+
+                @if (control.touched && control.errors?.['required']) {
+                  <span class="field-error">O domínio é obrigatório.</span>
+                }
+                @if (control.touched && control.errors?.['pattern']) {
+                  <span class="field-error">Formato inválido. Use apenas letras, números, pontos e hífens.</span>
+                }
+                @if (validationErrors()['domains.' + $index]) {
+                  <span class="field-error">{{ validationErrors()['domains.' + $index][0] }}</span>
+                }
+              </div>
+
+              @if (domainsArray.length > 1) {
+                <button
+                  type="button"
+                  class="btn-remove-domain"
+                  (click)="removeDomainField($index)"
+                  title="Remover este domínio"
+                >
+                  ✕
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/admin/tenants" class="btn-cancel">Cancelar</a>
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            <span>Provisionando Tenant...</span>
+          } @else {
+            <span>Salvar e Provisionar</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

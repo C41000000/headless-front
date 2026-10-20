@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --tenant-primary: #0d6efd;
+  --tenant-secondary: #6c757d;
+  --tenant-accent: #ffc107;
+  --tenant-font: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--tenant-font);
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+* {
+  box-sizing: border-box;
+}

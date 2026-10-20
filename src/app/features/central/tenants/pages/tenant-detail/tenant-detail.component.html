@@ -1,0 +1,175 @@
+<div class="page-container">
+  <div class="breadcrumb">
+    <a routerLink="/admin/tenants">← Voltar para Tenants</a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Carregando dados do tenant...</p>
+    </div>
+  } @else if (tenant(); as t) {
+    <div class="page-header">
+      <div>
+        <div class="tenant-uuid-badge">UUID: {{ t.uuid }}</div>
+        <h1>{{ t.name }}</h1>
+        <p>Criado em {{ t.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em {{ t.updated_at | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+    </div>
+
+    <div class="grid-layout">
+      <!-- Card: Dados do Tenant -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Editar Nome do Tenant</h2>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="tenantName">Nome da Empresa / Cliente</label>
+            <div class="input-with-button">
+              <input
+                id="tenantName"
+                type="text"
+                [formControl]="nameControl"
+                placeholder="Nome do tenant"
+                [class.is-invalid]="nameControl.touched && nameControl.invalid"
+              />
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="isSavingName() || nameControl.invalid || nameControl.value === t.name"
+                (click)="onSaveName()"
+              >
+                @if (isSavingName()) {
+                  Salvando...
+                } @else {
+                  Atualizar
+                }
+              </button>
+            </div>
+
+            @if (nameControl.touched && nameControl.errors?.['required']) {
+              <span class="field-error">O nome do tenant é obrigatório.</span>
+            }
+            @if (nameValidationErrors()['name']) {
+              <span class="field-error">{{ nameValidationErrors()['name'][0] }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Gerenciamento de Domínios -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Domínios Vinculados</h2>
+          <span class="header-count">{{ t.domains?.length ?? 0 }} domínio(s)</span>
+        </div>
+        <div class="card-body">
+          <!-- Formulário para adicionar domínio -->
+          <div class="add-domain-box">
+            <label for="newDomain">Adicionar Novo Domínio</label>
+            <div class="input-with-button">
+              <input
+                id="newDomain"
+                type="text"
+                [formControl]="newDomainControl"
+                placeholder="ex: cliente.app.com ou empresa.localhost"
+                [class.is-invalid]="(newDomainControl.touched && newDomainControl.invalid) || domainValidationErrors()['domain']"
+              />
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="isAddingDomain() || newDomainControl.invalid"
+                (click)="onAddDomain()"
+              >
+                @if (isAddingDomain()) {
+                  Adicionando...
+                } @else {
+                  + Adicionar
+                }
+              </button>
+            </div>
+
+            @if (newDomainControl.touched && newDomainControl.errors?.['required']) {
+              <span class="field-error">O domínio é obrigatório.</span>
+            }
+            @if (newDomainControl.touched && newDomainControl.errors?.['pattern']) {
+              <span class="field-error">Formato inválido. Use apenas letras, números, pontos e hífens.</span>
+            }
+            @if (domainValidationErrors()['domain']) {
+              <span class="field-error">{{ domainValidationErrors()['domain'][0] }}</span>
+            }
+          </div>
+
+          <!-- Lista de domínios existentes -->
+          <div class="domains-list">
+            @for (domain of t.domains ?? []; track domain.uuid) {
+              <div class="domain-item">
+                @if (editingDomainUuid() === domain.uuid) {
+                  <!-- Modo edição de domínio -->
+                  <div class="edit-domain-row">
+                    <input
+                      type="text"
+                      [formControl]="editDomainControl"
+                      [class.is-invalid]="editDomainControl.touched && editDomainControl.invalid"
+                    />
+                    <div class="edit-actions">
+                      <button
+                        type="button"
+                        class="btn-save-inline"
+                        [disabled]="editDomainControl.invalid"
+                        (click)="onSaveEditDomain(domain)"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-cancel-inline"
+                        (click)="cancelEditDomain()"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Modo visualização de domínio -->
+                  <div class="domain-info">
+                    <span class="domain-badge">{{ domain.domain }}</span>
+                    <span class="domain-meta">UUID: {{ domain.uuid }}</span>
+                  </div>
+
+                  <div class="domain-actions">
+                    <button
+                      type="button"
+                      class="btn-inline btn-edit"
+                      (click)="startEditDomain(domain)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-inline btn-delete"
+                      [disabled]="deletingDomainUuid() === domain.uuid || (t.domains?.length ?? 0) <= 1"
+                      [title]="(t.domains?.length ?? 0) <= 1 ? 'Todo tenant precisa manter pelo menos 1 domínio ativo.' : 'Remover domínio'"
+                      (click)="onDeleteDomain(domain)"
+                    >
+                      @if (deletingDomainUuid() === domain.uuid) {
+                        ...
+                      } @else {
+                        Excluir
+                      }
+                    </button>
+                  </div>
+                }
+              </div>
+            } @empty {
+              <div class="empty-state">
+                Nenhum domínio cadastrado para este tenant.
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

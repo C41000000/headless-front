@@ -1,0 +1,109 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1>Gerenciamento de Tenants</h1>
+      <p>Clientes cadastrados e provisionados com banco de dados isolado</p>
+    </div>
+
+    <a routerLink="/admin/tenants/new" class="btn-primary">
+      + Novo Tenant
+    </a>
+  </div>
+
+  <div class="card">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando tenants...</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Domínios Registrados</th>
+              <th>Criado em</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tenant of tenants(); track tenant.uuid) {
+              <tr>
+                <td class="font-medium">
+                  <a [routerLink]="['/admin/tenants', tenant.uuid]" class="tenant-link">
+                    {{ tenant.name }}
+                  </a>
+                </td>
+                <td>
+                  <div class="domains-badge-list">
+                    @for (domain of tenant.domains ?? []; track domain.uuid) {
+                      <span class="badge-domain">{{ domain.domain }}</span>
+                    } @empty {
+                      <span class="text-muted">Nenhum domínio</span>
+                    }
+                  </div>
+                </td>
+                <td class="text-muted">
+                  {{ tenant.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="text-right actions-cell">
+                  <a [routerLink]="['/admin/tenants', tenant.uuid]" class="btn-action btn-edit">
+                    Gerenciar
+                  </a>
+                  <button
+                    type="button"
+                    class="btn-action btn-delete"
+                    [disabled]="deletingUuid() === tenant.uuid"
+                    (click)="onDelete(tenant)"
+                  >
+                    @if (deletingUuid() === tenant.uuid) {
+                      Removendo...
+                    } @else {
+                      Excluir
+                    }
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">
+                  Nenhum tenant cadastrado no sistema. Clique em "+ Novo Tenant" para provisionar o primeiro.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (meta(); as pagination) {
+        @if (pagination.last_page > 1) {
+          <div class="pagination-footer">
+            <span class="pagination-info">
+              Exibindo página {{ pagination.current_page }} de {{ pagination.last_page }} (total: {{ pagination.total }} tenants)
+            </span>
+
+            <div class="pagination-buttons">
+              <button
+                type="button"
+                class="btn-page"
+                [disabled]="pagination.current_page <= 1"
+                (click)="loadTenants(pagination.current_page - 1)"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                class="btn-page"
+                [disabled]="pagination.current_page >= pagination.last_page"
+                (click)="loadTenants(pagination.current_page + 1)"
+              >
+                Próxima
+              </button>
+            </div>
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="badge-central">Painel Central</div>
+      <h1>Acesso Administrativo</h1>
+      <p>Gerenciamento da plataforma e múltiplos tenants</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="admin@exemplo.com"
+          [class.is-invalid]="(loginForm.controls.email.touched && loginForm.controls.email.invalid) || validationErrors()['email']"
+        />
+
+        @if (loginForm.controls.email.touched && loginForm.controls.email.errors?.['required']) {
+          <span class="field-error">O e-mail é obrigatório.</span>
+        }
+        @if (loginForm.controls.email.touched && loginForm.controls.email.errors?.['email']) {
+          <span class="field-error">Insira um e-mail válido.</span>
+        }
+        @if (validationErrors()['email']) {
+          <span class="field-error">{{ validationErrors()['email'][0] }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.is-invalid]="(loginForm.controls.password.touched && loginForm.controls.password.invalid) || validationErrors()['password']"
+        />
+
+        @if (loginForm.controls.password.touched && loginForm.controls.password.errors?.['required']) {
+          <span class="field-error">A senha é obrigatória.</span>
+        }
+        @if (validationErrors()['password']) {
+          <span class="field-error">{{ validationErrors()['password'][0] }}</span>
+        }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          <span>Autenticando...</span>
+        } @else {
+          <span>Entrar no Sistema</span>
+        }
+      </button>
+    </form>
+  </div>
+</div>
