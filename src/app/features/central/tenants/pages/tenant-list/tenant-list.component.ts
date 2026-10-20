@@ -1,11 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,6 +15,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiErrorResponse, PaginationMeta, TenantDto } from '@core/models';
 import { ToastService } from '@core/toast';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog';
+import { MatPaginatorIntlPtBr } from '@shared/paginator/mat-paginator-intl-ptbr';
 import { TenantsService } from '../../services/tenants.service';
 
 @Component({
@@ -29,6 +32,11 @@ import { TenantsService } from '../../services/tenants.service';
     MatChipsModule,
     MatProgressBarModule,
     MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
+  providers: [
+    { provide: MatPaginatorIntl, useClass: MatPaginatorIntlPtBr },
   ],
   templateUrl: './tenant-list.component.html',
   styleUrl: './tenant-list.component.scss',
@@ -42,9 +50,23 @@ export class TenantListComponent implements OnInit {
 
   public readonly displayedColumns: string[] = ['name', 'domains', 'created_at', 'actions'];
   public readonly tenants = signal<TenantDto[]>([]);
+  public readonly searchQuery = signal<string>('');
   public readonly meta = signal<PaginationMeta | null>(null);
   public readonly isLoading = signal<boolean>(false);
   public readonly deletingUuid = signal<string | null>(null);
+
+  public readonly filteredTenants = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    const list = this.tenants();
+    if (!query) {
+      return list;
+    }
+    return list.filter((t) => {
+      const matchName = t.name.toLowerCase().includes(query);
+      const matchDomain = (t.domains ?? []).some((d) => d.domain.toLowerCase().includes(query));
+      return matchName || matchDomain;
+    });
+  });
 
   public ngOnInit(): void {
     const createdName = this.route.snapshot.queryParamMap.get('created');
@@ -53,6 +75,22 @@ export class TenantListComponent implements OnInit {
       this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
     }
     this.loadTenants(1);
+  }
+
+  public onSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  public getDomainUrl(domain: string): string {
+    if (domain.startsWith('http://') || domain.startsWith('https://')) {
+      return domain;
+    }
+    // No ambiente local com porta 4200:
+    if (typeof window !== 'undefined' && window.location.port) {
+      return `${window.location.protocol}//${domain}:${window.location.port}`;
+    }
+    return `http://${domain}`;
   }
 
   public loadTenants(page = 1): void {

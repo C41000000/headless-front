@@ -1,0 +1,82 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #f1f5f9;
+}
+
+.login-card {
+  max-width: 440px;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+
+  mat-card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .login-logo {
+    object-fit: contain;
+    border-radius: 0;
+  }
+
+  .login-avatar {
+    background-color: var(--tenant-primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  mat-card-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  mat-card-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .submit-btn {
+    margin-top: 0.5rem;
+    height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    // Cor de marca do tenant (identidade visual) no lugar da cor do tema
+    --mat-button-filled-container-color: var(--tenant-primary);
+  }
+
+  .spinner-inline {
+    display: inline-block;
+  }
+}

@@ -71,6 +71,8 @@ Consequências:
 - O `authInterceptor` escolhe o token certo (`centralToken` ou `tenantToken`) e adiciona `Accept: application/json` + `Authorization: Bearer`.
 - O `apiErrorInterceptor` converte qualquer erro em `ApiErrorResponse` (`status`, `message`, `errors`, `retryAfter`) e, em 401, limpa o token e redireciona (`/admin/login` no central, `/auth/login` no tenant).
 - Rotas do central ficam sob `/admin` com `centralAuthGuard`/`centralGuestGuard`.
+- Rotas do tenant: `/auth/login` (`tenantGuestGuard`) e `/painel` (`tenantAuthGuard` + `TenantLayoutComponent`); novas páginas do tenant entram como filhas de `painel`.
+- Para testar um tenant no `localhost`, abra `http://localhost:4200/?tenant=empresa.localhost` (o override fica salvo; `setDevTenantOverride(null)` volta ao central).
 
 ### Endpoints da API (backend `../headless`)
 
@@ -137,9 +139,9 @@ Na dúvida sobre um campo ou regra de validação, consulte `../headless/app/Htt
 
 ## Armadilhas conhecidas
 
-- O `tsconfig.json` **não** está em `strict`. Mesmo assim, tipe tudo explicitamente e evite `any`.
-- Há código legado que trata respostas como se viessem envolvidas em `data` (`unwrap()` em `TenantsService`, `ApiResponse<T>` em `VisualIdentityService` e `CentralAuthService`). O backend **não** envolve objetos simples; não replique esse padrão em código novo.
-- O contexto tenant ainda não tem páginas: a rota `/auth/login` usada no redirecionamento de 401 do tenant precisa ser criada quando a feature tenant for implementada.
+- TypeScript e templates estão em modo estrito (`strict` + `strictTemplates`). Não desligue nem use `any` para contornar erros.
+- Não crie wrappers do tipo `ApiResponse<T>`/`unwrap()`: o backend não envolve objetos simples em `data`.
+- Os guards checam o contexto: rotas `/admin` em domínio de tenant redirecionam para `/painel`, e rotas do tenant (`/auth/login`, `/painel`) no central redirecionam para `/admin`. A raiz `''` e `**` redirecionam conforme o contexto (`contextHome` em `app.routes.ts`).
 - Não altere `environment.ts` com URLs/domínios pessoais sem pedir; não edite `dist/`, `.angular/` ou `node_modules/`.
 
 ## Testes

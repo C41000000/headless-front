@@ -1,0 +1,15 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Olá, {{ authService.currentUser()?.name }}</h1>
+      <p class="page-subtitle">Painel administrativo de {{ tenantContext.tenantDomain() }}</p>
+    </div>
+  </div>
+
+  <mat-card class="welcome-card" appearance="outlined">
+    <mat-card-content class="welcome-content">
+      <mat-icon class="welcome-icon">dashboard</mat-icon>
+      <p>Os módulos de gestão do tenant aparecerão aqui.</p>
+    </mat-card-content>
+  </mat-card>
+</div>

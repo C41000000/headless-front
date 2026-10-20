@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TokenService } from '@core/auth/token.service';
-import { ApiResponse, AuthUserDto, LoginCredentialsDto, LoginResponseDto } from '@core/models';
+import { AuthUserDto, LoginCredentialsDto, LoginResponseDto } from '@core/models';
 import { Observable, tap } from 'rxjs';
 
 const CENTRAL_USER_KEY = 'headless_central_user';
@@ -22,20 +22,14 @@ export class CentralAuthService {
     () => this.tokenService.isCentralAuthenticated() && this._currentUser() !== null,
   );
 
-  public login(
-    credentials: LoginCredentialsDto,
-  ): Observable<LoginResponseDto | ApiResponse<LoginResponseDto>> {
-    return this.http
-      .post<LoginResponseDto | ApiResponse<LoginResponseDto>>('/api/v1/auth/login', credentials)
-      .pipe(
-        tap((response) => {
-          const payload = 'data' in response ? response.data : response;
-          const { access_token, user } = payload;
-          this.tokenService.setCentralToken(access_token);
-          this._currentUser.set(user);
-          this.writeStoredUser(user);
-        }),
-      );
+  public login(credentials: LoginCredentialsDto): Observable<LoginResponseDto> {
+    return this.http.post<LoginResponseDto>('/api/v1/auth/login', credentials).pipe(
+      tap(({ access_token, user }) => {
+        this.tokenService.setCentralToken(access_token);
+        this._currentUser.set(user);
+        this.writeStoredUser(user);
+      }),
+    );
   }
 
   public logout(): void {

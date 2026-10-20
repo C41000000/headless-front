@@ -32,24 +32,21 @@ describe('CentralAuthService', () => {
 
   it('should authenticate user and store token/user on login success', () => {
     const mockResponse = {
-      data: {
-        access_token: 'jwt-token-123',
-        token_type: 'Bearer',
-        expires_in: 3600,
-        user: {
-          uuid: 'user-uuid-1',
-          name: 'Super Admin',
-          email: 'admin@example.com',
-          is_active: true,
-          created_at: '2026-10-20T10:00:00Z',
-          updated_at: '2026-10-20T10:00:00Z',
-        },
+      access_token: 'jwt-token-123',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      user: {
+        uuid: 'user-uuid-1',
+        name: 'Super Admin',
+        email: 'admin@example.com',
+        is_active: true,
+        created_at: '2026-10-20T10:00:00Z',
+        updated_at: '2026-10-20T10:00:00Z',
       },
     };
 
     service.login({ email: 'admin@example.com', password: 'password' }).subscribe((res) => {
-      const payload = 'data' in res ? res.data : res;
-      expect(payload.access_token).toBe('jwt-token-123');
+      expect(res.access_token).toBe('jwt-token-123');
       expect(service.currentUser()?.name).toBe('Super Admin');
       expect(service.isAuthenticated()).toBe(true);
       expect(tokenService.centralToken()).toBe('jwt-token-123');

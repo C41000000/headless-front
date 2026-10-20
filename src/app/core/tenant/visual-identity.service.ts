@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { ApiResponse, VisualIdentityDto } from '@core/models';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { VisualIdentityDto } from '@core/models';
+import { Observable, catchError, of, tap } from 'rxjs';
 import { TenantContextService } from './tenant-context.service';
 
 @Injectable({
@@ -29,14 +29,13 @@ export class VisualIdentityService {
     this._isLoading.set(true);
     this._error.set(null);
 
-    return this.http.get<ApiResponse<VisualIdentityDto>>('/api/v1/visual-identity').pipe(
-      map((response) => response.data),
+    return this.http.get<VisualIdentityDto>('/api/v1/visual-identity').pipe(
       tap((identity) => {
         this._visualIdentity.set(identity);
         this.applyVisualIdentity(identity);
         this._isLoading.set(false);
       }),
-      catchError((err: unknown) => {
+      catchError(() => {
         this._error.set('Não foi possível carregar a identidade visual do tenant.');
         this._isLoading.set(false);
         return of(null);

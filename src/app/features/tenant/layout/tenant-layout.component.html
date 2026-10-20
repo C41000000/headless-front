@@ -1,0 +1,52 @@
+<div class="tenant-layout">
+  <mat-toolbar class="tenant-toolbar">
+    <div class="brand-container">
+      @if (visualIdentityService.visualIdentity()?.logo_dark_url; as logoUrl) {
+        <img class="brand-logo" [src]="logoUrl" alt="Logo" />
+      } @else {
+        <mat-icon class="brand-icon">storefront</mat-icon>
+      }
+      <span class="brand-title">{{ tenantContext.tenantDomain() }}</span>
+    </div>
+
+    <nav class="nav-links">
+      <a
+        mat-button
+        routerLink="/painel"
+        routerLinkActive="active-nav"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span>Início</span>
+      </a>
+    </nav>
+
+    <span class="spacer"></span>
+
+    <div class="user-menu-section">
+      @if (authService.currentUser(); as user) {
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+          <mat-icon>account_circle</mat-icon>
+          <span class="user-name">{{ user.name }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="menu-user-header">
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }}</small>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onLogout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </mat-toolbar>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

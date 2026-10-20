@@ -1,6 +1,13 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { TenantContextService } from '@core/tenant';
 import { centralAuthGuard } from './features/central/auth/guards/central-auth.guard';
 import { centralGuestGuard } from './features/central/auth/guards/central-guest.guard';
+import { tenantAuthGuard } from './features/tenant/auth/guards/tenant-auth.guard';
+import { tenantGuestGuard } from './features/tenant/auth/guards/tenant-guest.guard';
+
+// O mesmo build atende o central e os tenants: a raiz depende do domínio acessado
+const contextHome = () => (inject(TenantContextService).isTenant() ? 'painel' : 'admin/tenants');
 
 export const routes: Routes = [
   {
@@ -48,12 +55,37 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'auth/login',
+    canActivate: [tenantGuestGuard],
+    loadComponent: () =>
+      import('./features/tenant/auth/pages/tenant-login/tenant-login.component').then(
+        (m) => m.TenantLoginComponent,
+      ),
+  },
+  {
+    path: 'painel',
+    canActivate: [tenantAuthGuard],
+    loadComponent: () =>
+      import('./features/tenant/layout/tenant-layout.component').then(
+        (m) => m.TenantLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/tenant/home/pages/tenant-home/tenant-home.component').then(
+            (m) => m.TenantHomeComponent,
+          ),
+      },
+    ],
+  },
+  {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'admin/tenants',
+    redirectTo: contextHome,
   },
   {
     path: '**',
-    redirectTo: 'admin/tenants',
+    redirectTo: contextHome,
   },
 ];

@@ -9,14 +9,7 @@ import {
   UpdateDomainDto,
   UpdateTenantDto,
 } from '@core/models';
-import { Observable, map } from 'rxjs';
-
-function unwrap<T>(res: T | { data: T }): T {
-  if (res && typeof res === 'object' && 'data' in res && (res as any).data !== undefined) {
-    return (res as { data: T }).data;
-  }
-  return res as T;
-}
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -30,21 +23,15 @@ export class TenantsService {
   }
 
   public getTenant(uuid: string): Observable<TenantDto> {
-    return this.http.get<TenantDto | { data: TenantDto }>(`/api/v1/tenants/${uuid}`).pipe(
-      map(unwrap),
-    );
+    return this.http.get<TenantDto>(`/api/v1/tenants/${uuid}`);
   }
 
   public createTenant(dto: CreateTenantDto): Observable<TenantDto> {
-    return this.http.post<TenantDto | { data: TenantDto }>('/api/v1/tenants', dto).pipe(
-      map(unwrap),
-    );
+    return this.http.post<TenantDto>('/api/v1/tenants', dto);
   }
 
   public updateTenant(uuid: string, dto: UpdateTenantDto): Observable<TenantDto> {
-    return this.http.patch<TenantDto | { data: TenantDto }>(`/api/v1/tenants/${uuid}`, dto).pipe(
-      map(unwrap),
-    );
+    return this.http.patch<TenantDto>(`/api/v1/tenants/${uuid}`, dto);
   }
 
   public deleteTenant(uuid: string): Observable<void> {
@@ -52,15 +39,11 @@ export class TenantsService {
   }
 
   public getDomains(tenantUuid: string): Observable<DomainDto[]> {
-    return this.http.get<DomainDto[] | { data: DomainDto[] }>(`/api/v1/tenants/${tenantUuid}/domains`).pipe(
-      map(unwrap),
-    );
+    return this.http.get<DomainDto[]>(`/api/v1/tenants/${tenantUuid}/domains`);
   }
 
   public addDomain(tenantUuid: string, dto: CreateDomainDto): Observable<DomainDto> {
-    return this.http.post<DomainDto | { data: DomainDto }>(`/api/v1/tenants/${tenantUuid}/domains`, dto).pipe(
-      map(unwrap),
-    );
+    return this.http.post<DomainDto>(`/api/v1/tenants/${tenantUuid}/domains`, dto);
   }
 
   public updateDomain(
@@ -68,12 +51,7 @@ export class TenantsService {
     domainUuid: string,
     dto: UpdateDomainDto,
   ): Observable<DomainDto> {
-    return this.http.patch<DomainDto | { data: DomainDto }>(
-      `/api/v1/tenants/${tenantUuid}/domains/${domainUuid}`,
-      dto,
-    ).pipe(
-      map(unwrap),
-    );
+    return this.http.patch<DomainDto>(`/api/v1/tenants/${tenantUuid}/domains/${domainUuid}`, dto);
   }
 
   public deleteDomain(tenantUuid: string, domainUuid: string): Observable<void> {
