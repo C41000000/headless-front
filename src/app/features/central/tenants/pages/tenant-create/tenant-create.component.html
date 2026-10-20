@@ -1,97 +1,124 @@
 <div class="page-container">
   <div class="breadcrumb">
-    <a routerLink="/admin/tenants">← Voltar para Tenants</a>
+    <a mat-button routerLink="/admin/tenants">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Voltar para Tenants</span>
+    </a>
   </div>
 
   <div class="page-header">
-    <h1>Cadastrar Novo Tenant</h1>
-    <p>Criação do cliente, provisionamento automático do banco de dados e configuração de domínios</p>
+    <h1 class="page-title">Cadastrar Novo Tenant</h1>
+    <p class="page-subtitle">Criação do cliente, provisionamento automático do banco de dados e configuração de domínios</p>
   </div>
 
-  <div class="form-card">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <div class="form-group">
-        <label for="name">Nome da Empresa / Cliente</label>
-        <input
-          id="name"
-          type="text"
-          formControlName="name"
-          placeholder="Ex: Empresa Acme Ltda."
-          [class.is-invalid]="(form.controls.name.touched && form.controls.name.invalid) || validationErrors()['name']"
-        />
+  <mat-card class="form-card" appearance="outlined">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="tenant-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome da Empresa / Cliente</mat-label>
+          <input
+            matInput
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="Ex: Empresa Acme Ltda."
+          />
+          <mat-icon matPrefix>business</mat-icon>
 
-        @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
-          <span class="field-error">O nome do tenant é obrigatório.</span>
-        }
-        @if (validationErrors()['name']) {
-          <span class="field-error">{{ validationErrors()['name'][0] }}</span>
-        }
-      </div>
+          @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
+            <mat-error>O nome do tenant é obrigatório.</mat-error>
+          }
+          @if (validationErrors()['name']) {
+            <mat-error>{{ validationErrors()['name'][0] }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="domains-section">
-        <div class="domains-header">
-          <div>
-            <label class="section-label">Domínios de Acesso</label>
-            <span class="section-hint">Ao menos um hostname completo que identificará o tenant. Ex: <code>empresa.app.com</code></span>
+        <div class="domains-section">
+          <div class="domains-header">
+            <div>
+              <h3 class="section-title">Domínios de Acesso</h3>
+              <p class="section-hint">Identificadores para o roteamento automático do tenant (ex: <code>empresa.app.com</code>)</p>
+            </div>
+
+            <button
+              type="button"
+              mat-stroked-button
+              color="primary"
+              (click)="addDomainField()"
+              class="add-domain-btn"
+            >
+              <mat-icon>add</mat-icon>
+              <span>Adicionar Domínio</span>
+            </button>
           </div>
 
-          <button type="button" class="btn-secondary" (click)="addDomainField()">
-            + Adicionar Outro Domínio
-          </button>
-        </div>
-
-        @if (validationErrors()['domains']) {
-          <span class="field-error">{{ validationErrors()['domains'][0] }}</span>
-        }
-
-        <div formArrayName="domains" class="domains-list">
-          @for (control of domainsArray.controls; track $index) {
-            <div class="domain-input-row">
-              <div class="input-with-error">
-                <input
-                  type="text"
-                  [formControlName]="$index"
-                  placeholder="ex: cliente.app.com ou empresa.localhost"
-                  [class.is-invalid]="(control.touched && control.invalid) || validationErrors()['domains.' + $index]"
-                />
-
-                @if (control.touched && control.errors?.['required']) {
-                  <span class="field-error">O domínio é obrigatório.</span>
-                }
-                @if (control.touched && control.errors?.['pattern']) {
-                  <span class="field-error">Formato inválido. Use apenas letras, números, pontos e hífens.</span>
-                }
-                @if (validationErrors()['domains.' + $index]) {
-                  <span class="field-error">{{ validationErrors()['domains.' + $index][0] }}</span>
-                }
-              </div>
-
-              @if (domainsArray.length > 1) {
-                <button
-                  type="button"
-                  class="btn-remove-domain"
-                  (click)="removeDomainField($index)"
-                  title="Remover este domínio"
-                >
-                  ✕
-                </button>
-              }
+          @if (validationErrors()['domains']) {
+            <div class="domains-validation-error">
+              <mat-icon color="warn">error_outline</mat-icon>
+              <span>{{ validationErrors()['domains'][0] }}</span>
             </div>
           }
-        </div>
-      </div>
 
-      <div class="form-actions">
-        <a routerLink="/admin/tenants" class="btn-cancel">Cancelar</a>
-        <button type="submit" class="btn-submit" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <span class="spinner"></span>
-            <span>Provisionando Tenant...</span>
-          } @else {
-            <span>Salvar e Provisionar</span>
-          }
-        </button>
-      </div>
-    </form>
-  </div>
+          <div formArrayName="domains" class="domains-list">
+            @for (control of domainsArray.controls; track $index) {
+              <div class="domain-row">
+                <mat-form-field appearance="outline" class="domain-field">
+                  <mat-label>Domínio {{ $index + 1 }}</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [formControlName]="$index"
+                    placeholder="cliente.app.com ou empresa.localhost"
+                  />
+                  <mat-icon matPrefix>language</mat-icon>
+
+                  @if (control.touched && control.errors?.['required']) {
+                    <mat-error>O domínio é obrigatório.</mat-error>
+                  } @else if (control.touched && control.errors?.['pattern']) {
+                    <mat-error>Insira um formato de domínio válido (letras, números, hífen e ponto).</mat-error>
+                  }
+                  @if (validationErrors()['domains.' + $index]) {
+                    <mat-error>{{ validationErrors()['domains.' + $index][0] }}</mat-error>
+                  }
+                </mat-form-field>
+
+                @if (domainsArray.length > 1) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="warn"
+                    class="remove-domain-btn"
+                    (click)="removeDomainField($index)"
+                    matTooltip="Remover este domínio"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a mat-button routerLink="/admin/tenants">
+            Cancelar
+          </a>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="isLoading() || form.invalid"
+            class="submit-btn"
+          >
+            @if (isLoading()) {
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+            } @else {
+              <mat-icon>save</mat-icon>
+            }
+            <span>{{ isLoading() ? 'Provisionando Tenant...' : 'Salvar e Provisionar' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </div>

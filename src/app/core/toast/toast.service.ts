@@ -1,15 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Toast, ToastType } from './toast.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ToastService {
+  private readonly snackBar = inject(MatSnackBar);
   private readonly _toasts = signal<Toast[]>([]);
   public readonly toasts = this._toasts.asReadonly();
 
   public show(message: string, type: ToastType = 'info', title?: string, duration = 4000): void {
-    // Evita duplicar o mesmo toast caso requisições concorrentes ocorram
     const alreadyExists = this._toasts().some(
       (t) => t.message === message && t.type === type,
     );
@@ -30,6 +31,13 @@ export class ToastService {
     };
 
     this._toasts.update((current) => [...current, newToast]);
+
+    this.snackBar.open(message, 'OK', {
+      duration,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: [`snackbar-${type}`],
+    });
 
     if (duration > 0 && typeof window !== 'undefined') {
       setTimeout(() => {

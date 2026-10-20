@@ -1,175 +1,209 @@
 <div class="page-container">
   <div class="breadcrumb">
-    <a routerLink="/admin/tenants">← Voltar para Tenants</a>
+    <a mat-button routerLink="/admin/tenants">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Voltar para Tenants</span>
+    </a>
   </div>
 
   @if (isLoading()) {
     <div class="loading-state">
-      <div class="spinner"></div>
+      <mat-spinner diameter="40"></mat-spinner>
       <p>Carregando dados do tenant...</p>
     </div>
   } @else if (tenant(); as t) {
     <div class="page-header">
       <div>
-        <div class="tenant-uuid-badge">UUID: {{ t.uuid }}</div>
-        <h1>{{ t.name }}</h1>
-        <p>Criado em {{ t.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em {{ t.updated_at | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <div class="uuid-badge">
+          <mat-icon>fingerprint</mat-icon>
+          <span>UUID: {{ t.uuid }}</span>
+        </div>
+        <h1 class="page-title">{{ t.name }}</h1>
+        <p class="page-subtitle">
+          Criado em {{ t.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em {{ t.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
       </div>
     </div>
 
-    <div class="grid-layout">
+    <div class="cards-grid">
       <!-- Card: Dados do Tenant -->
-      <div class="card">
-        <div class="card-header">
-          <h2>Editar Nome do Tenant</h2>
-        </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label for="tenantName">Nome da Empresa / Cliente</label>
-            <div class="input-with-button">
+      <mat-card class="detail-card" appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-avatar">business</mat-icon>
+          <mat-card-title>Nome do Tenant</mat-card-title>
+          <mat-card-subtitle>Altere a razão social ou nome fantasia do cliente</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="card-content-spaced">
+          <div class="inline-edit-row">
+            <mat-form-field appearance="outline" class="flex-grow">
+              <mat-label>Nome da Empresa / Cliente</mat-label>
               <input
+                matInput
                 id="tenantName"
                 type="text"
                 [formControl]="nameControl"
                 placeholder="Nome do tenant"
-                [class.is-invalid]="nameControl.touched && nameControl.invalid"
               />
-              <button
-                type="button"
-                class="btn-primary"
-                [disabled]="isSavingName() || nameControl.invalid || nameControl.value === t.name"
-                (click)="onSaveName()"
-              >
-                @if (isSavingName()) {
-                  Salvando...
-                } @else {
-                  Atualizar
-                }
-              </button>
-            </div>
+              @if (nameControl.touched && nameControl.invalid) {
+                <mat-error>O nome do tenant é obrigatório.</mat-error>
+              }
+              @if (nameValidationErrors()['name']) {
+                <mat-error>{{ nameValidationErrors()['name'][0] }}</mat-error>
+              }
+            </mat-form-field>
 
-            @if (nameControl.touched && nameControl.errors?.['required']) {
-              <span class="field-error">O nome do tenant é obrigatório.</span>
-            }
-            @if (nameValidationErrors()['name']) {
-              <span class="field-error">{{ nameValidationErrors()['name'][0] }}</span>
-            }
+            <button
+              mat-flat-button
+              color="primary"
+              class="action-button-aligned"
+              [disabled]="isSavingName() || nameControl.invalid || nameControl.value === t.name"
+              (click)="onSaveName()"
+            >
+              @if (isSavingName()) {
+                <mat-spinner diameter="18" class="spinner-inline"></mat-spinner>
+              } @else {
+                <mat-icon>check</mat-icon>
+              }
+              <span>{{ isSavingName() ? 'Salvando...' : 'Atualizar' }}</span>
+            </button>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Card: Gerenciamento de Domínios -->
-      <div class="card">
-        <div class="card-header">
-          <h2>Domínios Vinculados</h2>
-          <span class="header-count">{{ t.domains?.length ?? 0 }} domínio(s)</span>
-        </div>
-        <div class="card-body">
-          <!-- Formulário para adicionar domínio -->
-          <div class="add-domain-box">
-            <label for="newDomain">Adicionar Novo Domínio</label>
-            <div class="input-with-button">
-              <input
-                id="newDomain"
-                type="text"
-                [formControl]="newDomainControl"
-                placeholder="ex: cliente.app.com ou empresa.localhost"
-                [class.is-invalid]="(newDomainControl.touched && newDomainControl.invalid) || domainValidationErrors()['domain']"
-              />
+      <mat-card class="detail-card" appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-avatar">language</mat-icon>
+          <mat-card-title>Domínios de Acesso</mat-card-title>
+          <mat-card-subtitle>Hostnames vinculados a este tenant para resolução multi-tenant</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="card-content-spaced">
+          <!-- Novo domínio inline input -->
+          <div class="new-domain-box">
+            <div class="inline-edit-row">
+              <mat-form-field appearance="outline" class="flex-grow">
+                <mat-label>Adicionar Novo Hostname</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [formControl]="newDomainControl"
+                  placeholder="ex: filial.app.com ou empresa.localhost"
+                  (keyup.enter)="onAddDomain()"
+                />
+                <mat-icon matPrefix>add_link</mat-icon>
+                @if (newDomainControl.touched && newDomainControl.errors?.['required']) {
+                  <mat-error>O domínio é obrigatório.</mat-error>
+                } @else if (newDomainControl.touched && newDomainControl.errors?.['pattern']) {
+                  <mat-error>Formato de domínio inválido.</mat-error>
+                }
+                @if (domainValidationErrors()['domain']) {
+                  <mat-error>{{ domainValidationErrors()['domain'][0] }}</mat-error>
+                }
+              </mat-form-field>
+
               <button
-                type="button"
-                class="btn-primary"
+                mat-flat-button
+                color="primary"
+                class="action-button-aligned"
                 [disabled]="isAddingDomain() || newDomainControl.invalid"
                 (click)="onAddDomain()"
               >
                 @if (isAddingDomain()) {
-                  Adicionando...
+                  <mat-spinner diameter="18" class="spinner-inline"></mat-spinner>
                 } @else {
-                  + Adicionar
+                  <mat-icon>add</mat-icon>
                 }
+                <span>{{ isAddingDomain() ? 'Adicionando...' : 'Vincular' }}</span>
               </button>
             </div>
-
-            @if (newDomainControl.touched && newDomainControl.errors?.['required']) {
-              <span class="field-error">O domínio é obrigatório.</span>
-            }
-            @if (newDomainControl.touched && newDomainControl.errors?.['pattern']) {
-              <span class="field-error">Formato inválido. Use apenas letras, números, pontos e hífens.</span>
-            }
-            @if (domainValidationErrors()['domain']) {
-              <span class="field-error">{{ domainValidationErrors()['domain'][0] }}</span>
-            }
           </div>
 
-          <!-- Lista de domínios existentes -->
-          <div class="domains-list">
-            @for (domain of t.domains ?? []; track domain.uuid) {
-              <div class="domain-item">
-                @if (editingDomainUuid() === domain.uuid) {
-                  <!-- Modo edição de domínio -->
-                  <div class="edit-domain-row">
-                    <input
-                      type="text"
-                      [formControl]="editDomainControl"
-                      [class.is-invalid]="editDomainControl.touched && editDomainControl.invalid"
-                    />
-                    <div class="edit-actions">
+          <!-- Tabela de Domínios -->
+          <div class="table-responsive">
+            <table mat-table [dataSource]="t.domains ?? []" class="domains-table">
+              <!-- Domínio Column -->
+              <ng-container matColumnDef="domain">
+                <th mat-header-cell *matHeaderCellDef>Domínio / Hostname</th>
+                <td mat-cell *matCellDef="let domain">
+                  @if (editingDomainUuid() === domain.uuid) {
+                    <div class="inline-cell-edit">
+                      <mat-form-field appearance="outline" class="edit-cell-field">
+                        <input
+                          matInput
+                          [formControl]="editDomainControl"
+                          (keyup.enter)="onSaveEditDomain(domain)"
+                          (keyup.escape)="cancelEditDomain()"
+                        />
+                      </mat-form-field>
                       <button
-                        type="button"
-                        class="btn-save-inline"
-                        [disabled]="editDomainControl.invalid"
+                        mat-icon-button
+                        color="primary"
                         (click)="onSaveEditDomain(domain)"
+                        matTooltip="Salvar alteração"
                       >
-                        Salvar
+                        <mat-icon>check</mat-icon>
                       </button>
                       <button
-                        type="button"
-                        class="btn-cancel-inline"
+                        mat-icon-button
                         (click)="cancelEditDomain()"
+                        matTooltip="Cancelar"
                       >
-                        Cancelar
+                        <mat-icon>close</mat-icon>
                       </button>
                     </div>
-                  </div>
-                } @else {
-                  <!-- Modo visualização de domínio -->
-                  <div class="domain-info">
-                    <span class="domain-badge">{{ domain.domain }}</span>
-                    <span class="domain-meta">UUID: {{ domain.uuid }}</span>
-                  </div>
+                  } @else {
+                    <div class="domain-badge-cell">
+                      <mat-chip class="domain-chip">
+                        <mat-icon matChipAvatar>language</mat-icon>
+                        {{ domain.domain }}
+                      </mat-chip>
+                    </div>
+                  }
+                </td>
+              </ng-container>
 
-                  <div class="domain-actions">
+              <!-- Criado em Column -->
+              <ng-container matColumnDef="created_at">
+                <th mat-header-cell *matHeaderCellDef>Adicionado em</th>
+                <td mat-cell *matCellDef="let domain" class="text-muted">
+                  {{ domain.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+              </ng-container>
+
+              <!-- Ações Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Ações</th>
+                <td mat-cell *matCellDef="let domain" class="text-right">
+                  @if (editingDomainUuid() !== domain.uuid) {
                     <button
-                      type="button"
-                      class="btn-inline btn-edit"
+                      mat-icon-button
+                      color="primary"
                       (click)="startEditDomain(domain)"
+                      matTooltip="Editar domínio"
                     >
-                      Editar
+                      <mat-icon>edit</mat-icon>
                     </button>
                     <button
-                      type="button"
-                      class="btn-inline btn-delete"
+                      mat-icon-button
+                      color="warn"
                       [disabled]="deletingDomainUuid() === domain.uuid || (t.domains?.length ?? 0) <= 1"
-                      [title]="(t.domains?.length ?? 0) <= 1 ? 'Todo tenant precisa manter pelo menos 1 domínio ativo.' : 'Remover domínio'"
                       (click)="onDeleteDomain(domain)"
+                      [matTooltip]="(t.domains?.length ?? 0) <= 1 ? 'Não é possível remover o único domínio' : 'Excluir domínio'"
                     >
-                      @if (deletingDomainUuid() === domain.uuid) {
-                        ...
-                      } @else {
-                        Excluir
-                      }
+                      <mat-icon>delete_outline</mat-icon>
                     </button>
-                  </div>
-                }
-              </div>
-            } @empty {
-              <div class="empty-state">
-                Nenhum domínio cadastrado para este tenant.
-              </div>
-            }
+                  }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   }
 </div>

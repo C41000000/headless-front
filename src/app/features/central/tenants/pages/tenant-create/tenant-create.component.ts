@@ -1,5 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { ApiErrorResponse } from '@core/models';
 import { ToastService } from '@core/toast';
@@ -8,7 +14,16 @@ import { TenantsService } from '../../services/tenants.service';
 @Component({
   selector: 'app-tenant-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './tenant-create.component.html',
   styleUrl: './tenant-create.component.scss',
 })

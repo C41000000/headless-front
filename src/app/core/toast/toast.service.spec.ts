@@ -1,11 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ToastService } from './toast.service';
 
 describe('ToastService', () => {
   let service: ToastService;
+  let snackBarMock: { open: () => void };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    snackBarMock = { open: () => {} };
+    TestBed.configureTestingModule({
+      providers: [{ provide: MatSnackBar, useValue: snackBarMock }],
+    });
     service = TestBed.inject(ToastService);
   });
 

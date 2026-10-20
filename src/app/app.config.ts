@@ -5,6 +5,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { apiBaseUrlInterceptor, apiErrorInterceptor, authInterceptor } from '@core/http';
 import { VisualIdentityService } from '@core/tenant';
@@ -13,6 +14,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideAnimationsAsync(),
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([apiBaseUrlInterceptor, authInterceptor, apiErrorInterceptor]),

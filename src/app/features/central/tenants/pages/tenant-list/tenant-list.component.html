@@ -1,109 +1,113 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1>Gerenciamento de Tenants</h1>
-      <p>Clientes cadastrados e provisionados com banco de dados isolado</p>
+      <h1 class="page-title">Gerenciamento de Tenants</h1>
+      <p class="page-subtitle">Tenants cadastrados e provisionados com banco de dados isolado</p>
     </div>
 
-    <a routerLink="/admin/tenants/new" class="btn-primary">
-      + Novo Tenant
+    <a mat-flat-button color="primary" routerLink="/admin/tenants/new" class="create-btn">
+      <mat-icon>add</mat-icon>
+      <span>Novo Tenant</span>
     </a>
   </div>
 
-  <div class="card">
+  <mat-card class="table-card" appearance="outlined">
     @if (isLoading()) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Carregando tenants...</p>
-      </div>
-    } @else {
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Domínios Registrados</th>
-              <th>Criado em</th>
-              <th class="text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (tenant of tenants(); track tenant.uuid) {
-              <tr>
-                <td class="font-medium">
-                  <a [routerLink]="['/admin/tenants', tenant.uuid]" class="tenant-link">
-                    {{ tenant.name }}
-                  </a>
-                </td>
-                <td>
-                  <div class="domains-badge-list">
-                    @for (domain of tenant.domains ?? []; track domain.uuid) {
-                      <span class="badge-domain">{{ domain.domain }}</span>
-                    } @empty {
-                      <span class="text-muted">Nenhum domínio</span>
-                    }
-                  </div>
-                </td>
-                <td class="text-muted">
-                  {{ tenant.created_at | date: 'dd/MM/yyyy HH:mm' }}
-                </td>
-                <td class="text-right actions-cell">
-                  <a [routerLink]="['/admin/tenants', tenant.uuid]" class="btn-action btn-edit">
-                    Gerenciar
-                  </a>
-                  <button
-                    type="button"
-                    class="btn-action btn-delete"
-                    [disabled]="deletingUuid() === tenant.uuid"
-                    (click)="onDelete(tenant)"
-                  >
-                    @if (deletingUuid() === tenant.uuid) {
-                      Removendo...
-                    } @else {
-                      Excluir
-                    }
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="4" class="empty-state">
-                  Nenhum tenant cadastrado no sistema. Clique em "+ Novo Tenant" para provisionar o primeiro.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      @if (meta(); as pagination) {
-        @if (pagination.last_page > 1) {
-          <div class="pagination-footer">
-            <span class="pagination-info">
-              Exibindo página {{ pagination.current_page }} de {{ pagination.last_page }} (total: {{ pagination.total }} tenants)
-            </span>
-
-            <div class="pagination-buttons">
-              <button
-                type="button"
-                class="btn-page"
-                [disabled]="pagination.current_page <= 1"
-                (click)="loadTenants(pagination.current_page - 1)"
-              >
-                Anterior
-              </button>
-              <button
-                type="button"
-                class="btn-page"
-                [disabled]="pagination.current_page >= pagination.last_page"
-                (click)="loadTenants(pagination.current_page + 1)"
-              >
-                Próxima
-              </button>
-            </div>
-          </div>
-        }
-      }
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     }
-  </div>
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="tenants()" class="mat-elevation-z0 data-table">
+        <!-- Nome Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let tenant" class="font-medium">
+            <a [routerLink]="['/admin/tenants', tenant.uuid]" class="tenant-link">
+              <mat-icon class="tenant-inline-icon">business</mat-icon>
+              <span>{{ tenant.name }}</span>
+            </a>
+          </td>
+        </ng-container>
+
+        <!-- Domínios Column -->
+        <ng-container matColumnDef="domains">
+          <th mat-header-cell *matHeaderCellDef>Domínios Registrados</th>
+          <td mat-cell *matCellDef="let tenant">
+            <mat-chip-set class="domains-chip-set">
+              @for (domain of tenant.domains ?? []; track domain.uuid) {
+                <mat-chip class="domain-chip">
+                  <mat-icon matChipAvatar class="chip-icon">language</mat-icon>
+                  {{ domain.domain }}
+                </mat-chip>
+              } @empty {
+                <span class="text-muted">Nenhum domínio</span>
+              }
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Criado em Column -->
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>Criado em</th>
+          <td mat-cell *matCellDef="let tenant" class="text-muted">
+            {{ tenant.created_at | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Ações Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Ações</th>
+          <td mat-cell *matCellDef="let tenant" class="text-right actions-cell">
+            <a
+              mat-stroked-button
+              [routerLink]="['/admin/tenants', tenant.uuid]"
+              class="action-btn"
+            >
+              <mat-icon>settings</mat-icon>
+              <span>Gerenciar</span>
+            </a>
+            <button
+              mat-icon-button
+              color="warn"
+              [disabled]="deletingUuid() === tenant.uuid"
+              (click)="onDelete(tenant)"
+              matTooltip="Excluir Tenant"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-table" [attr.colspan]="displayedColumns.length">
+            @if (!isLoading()) {
+              <div class="empty-state">
+                <mat-icon class="empty-icon">apartment</mat-icon>
+                <p>Nenhum tenant cadastrado no sistema.</p>
+                <a mat-stroked-button color="primary" routerLink="/admin/tenants/new">
+                  Cadastrar o Primeiro Tenant
+                </a>
+              </div>
+            }
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    @if (meta(); as m) {
+      <mat-paginator
+        [length]="m.total"
+        [pageSize]="m.per_page"
+        [pageIndex]="m.current_page - 1"
+        [hidePageSize]="true"
+        (page)="onPageChange($event)"
+        aria-label="Selecionar página de tenants"
+      >
+      </mat-paginator>
+    }
+  </mat-card>
 </div>

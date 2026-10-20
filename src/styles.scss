@@ -1,8 +1,10 @@
+@use '@angular/material/prebuilt-themes/azure-blue.css';
+
 :root {
-  --tenant-primary: #0d6efd;
-  --tenant-secondary: #6c757d;
-  --tenant-accent: #ffc107;
-  --tenant-font: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --tenant-primary: #0284c7;
+  --tenant-secondary: #64748b;
+  --tenant-accent: #f59e0b;
+  --tenant-font: Roboto, system-ui, -apple-system, sans-serif;
 }
 
 html, body {
@@ -15,4 +17,29 @@ html, body {
 
 * {
   box-sizing: border-box;
+}
+
+// Custom styling for Angular Material SnackBar types
+.snackbar-success {
+  --mdc-snackbar-container-color: #166534;
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+}
+
+.snackbar-error {
+  --mdc-snackbar-container-color: #991b1b;
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+}
+
+.snackbar-warning {
+  --mdc-snackbar-container-color: #b45309;
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+}
+
+.snackbar-info {
+  --mdc-snackbar-container-color: #0369a1;
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-supporting-text-color: #ffffff;
 }

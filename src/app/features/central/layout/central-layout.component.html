@@ -1,27 +1,41 @@
 <div class="admin-layout">
-  <header class="top-nav">
-    <div class="nav-brand">
-      <span class="brand-badge">Central</span>
-      <span class="brand-title">Headless Admin</span>
+  <mat-toolbar color="primary" class="admin-toolbar">
+    <div class="brand-container">
+      <mat-icon class="brand-icon">hub</mat-icon>
+      <span class="brand-title">Central Admin</span>
     </div>
 
     <nav class="nav-links">
-      <a routerLink="/admin/tenants" routerLinkActive="active" class="nav-item">Tenants</a>
+      <a mat-button routerLink="/admin/tenants" routerLinkActive="active-nav">
+        <mat-icon>domain</mat-icon>
+        <span>Tenants</span>
+      </a>
     </nav>
 
-    <div class="nav-user">
-      @if (authService.currentUser(); as user) {
-        <div class="user-info">
-          <span class="user-name">{{ user.name }}</span>
-          <span class="user-email">{{ user.email }}</span>
-        </div>
-      }
+    <span class="spacer"></span>
 
-      <button type="button" class="btn-logout" (click)="onLogout()">
-        Sair
-      </button>
+    <div class="user-menu-section">
+      @if (authService.currentUser(); as user) {
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+          <mat-icon>account_circle</mat-icon>
+          <span class="user-name">{{ user.name }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="menu-user-header">
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }}</small>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onLogout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair do Sistema</span>
+          </button>
+        </mat-menu>
+      }
     </div>
-  </header>
+  </mat-toolbar>
 
   <main class="main-content">
     <router-outlet />

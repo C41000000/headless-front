@@ -8,83 +8,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 
-  h1 {
+  .page-title {
     font-size: 1.75rem;
     font-weight: 700;
     color: #0f172a;
     margin: 0 0 0.25rem 0;
   }
 
-  p {
+  .page-subtitle {
     font-size: 0.9rem;
     color: #64748b;
     margin: 0;
   }
-}
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  background-color: #0284c7;
-  color: #ffffff;
-  padding: 0.65rem 1.25rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #0369a1;
+  .create-btn {
+    border-radius: 8px;
+    height: 42px;
+    font-weight: 500;
   }
 }
 
-.alert {
-  padding: 0.85rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-
-  &.alert-success {
-    background-color: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-  }
-
-  &.alert-danger {
-    background-color: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-  }
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+.table-card {
+  border-radius: 12px;
   overflow: hidden;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3.5rem;
-  color: #64748b;
-
-  .spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid #e2e8f0;
-    border-bottom-color: #0284c7;
-    border-radius: 50%;
-    animation: rotation 1s linear infinite;
-    margin-bottom: 1rem;
-  }
+  background-color: #ffffff;
 }
 
 .table-responsive {
@@ -94,161 +44,104 @@
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.9rem;
 
-  th {
-    background-color: #f8fafc;
-    color: #475569;
+  th.mat-header-cell {
     font-weight: 600;
-    padding: 0.85rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  td {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
-    vertical-align: middle;
-  }
-
-  tr:hover td {
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     background-color: #f8fafc;
   }
 
-  .text-right {
-    text-align: right;
+  td.mat-cell {
+    font-size: 0.9rem;
+    color: #334155;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+
+  .tenant-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 600;
+
+    .tenant-inline-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .domains-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+
+    .domain-chip {
+      font-size: 0.8rem;
+      font-family: monospace;
+
+      .chip-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
   }
 
   .text-muted {
     color: #94a3b8;
   }
 
-  .font-medium {
-    font-weight: 600;
+  .text-right {
+    text-align: right;
   }
 
-  .empty-state {
-    text-align: center;
-    padding: 3rem 1.5rem;
-    color: #64748b;
-  }
-}
+  .actions-cell {
+    white-space: nowrap;
 
-.tenant-link {
-  color: #0f172a;
-  text-decoration: none;
-  font-weight: 600;
+    .action-btn {
+      margin-right: 0.5rem;
+      font-size: 0.825rem;
+      border-radius: 6px;
 
-  &:hover {
-    color: #0284c7;
-    text-decoration: underline;
-  }
-}
-
-.domains-badge-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-
-  .badge-domain {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    background-color: #f0fdf4;
-    color: #166534;
-    border: 1px solid #dcfce7;
-    font-size: 0.8rem;
-    font-weight: 500;
-    font-family: monospace;
-  }
-}
-
-.actions-cell {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-
-  .btn-action {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.825rem;
-    font-weight: 600;
-    border-radius: 0.375rem;
-    text-decoration: none;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &.btn-edit {
-      background-color: #f1f5f9;
-      color: #334155;
-      border-color: #cbd5e1;
-
-      &:hover {
-        background-color: #e2e8f0;
-      }
-    }
-
-    &.btn-delete {
-      background-color: #fff1f2;
-      color: #be123c;
-      border-color: #fecdd3;
-
-      &:hover:not(:disabled) {
-        background-color: #ffe4e6;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
       }
     }
   }
 }
 
-.pagination-footer {
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  gap: 0.75rem;
 
-  .pagination-info {
-    font-size: 0.85rem;
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
     color: #64748b;
+    font-size: 1rem;
   }
-
-  .pagination-buttons {
-    display: flex;
-    gap: 0.5rem;
-
-    .btn-page {
-      padding: 0.4rem 0.85rem;
-      font-size: 0.85rem;
-      border-radius: 0.375rem;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #334155;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover:not(:disabled) {
-        background-color: #f1f5f9;
-        border-color: #94a3b8;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-  }
-}
-
-@keyframes rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
