@@ -20,11 +20,11 @@
           matInput
           type="text"
           placeholder="Buscar por nome da empresa ou domínio..."
-          [value]="searchQuery()"
+          [value]="searchTerm()"
           (input)="onSearch($event)"
         />
-        @if (searchQuery()) {
-          <button mat-icon-button matSuffix (click)="searchQuery.set('')" matTooltip="Limpar busca">
+        @if (searchTerm()) {
+          <button mat-icon-button matSuffix (click)="clearSearch()" matTooltip="Limpar busca">
             <mat-icon>close</mat-icon>
           </button>
         }
@@ -36,7 +36,7 @@
     }
 
     <div class="table-responsive">
-      <table mat-table [dataSource]="filteredTenants()" class="mat-elevation-z0 data-table">
+      <table mat-table [dataSource]="tenants()" class="mat-elevation-z0 data-table">
         <!-- Empresa / Cliente Column -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef class="col-name">Empresa / Cliente</th>
@@ -56,8 +56,7 @@
           <td mat-cell *matCellDef="let tenant" class="col-domains">
             <div class="domains-wrapper">
               @for (domain of tenant.domains ?? []; track domain.uuid) {
-                <div class="domain-pill">
-                  <mat-icon class="domain-icon">language</mat-icon>
+                <div class="domain-item">
                   <span class="domain-text">{{ domain.domain }}</span>
                   <a
                     [href]="getDomainUrl(domain.domain)"
@@ -86,25 +85,23 @@
 
         <!-- Ações Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="col-actions text-right">Ações</th>
-          <td mat-cell *matCellDef="let tenant" class="col-actions text-right">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">Ações</th>
+          <td mat-cell *matCellDef="let tenant" class="col-actions">
             <div class="actions-group">
               <a
                 mat-icon-button
-                color="primary"
                 [routerLink]="['/admin/tenants', tenant.uuid]"
                 matTooltip="Editar Tenant"
-                class="action-icon-btn"
+                class="action-icon-btn edit-btn"
               >
                 <mat-icon>edit</mat-icon>
               </a>
               <button
                 mat-icon-button
-                color="warn"
                 [disabled]="deletingUuid() === tenant.uuid"
                 (click)="onDelete(tenant)"
                 matTooltip="Excluir Tenant"
-                class="action-icon-btn"
+                class="action-icon-btn delete-btn"
               >
                 <mat-icon>delete_outline</mat-icon>
               </button>
@@ -113,7 +110,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="tenant-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="tenant-row"></tr>
 
         <!-- No Data Row -->
         <tr class="mat-row" *matNoDataRow>
@@ -123,7 +120,7 @@
                 <mat-icon class="empty-icon">search_off</mat-icon>
                 @if (searchQuery()) {
                   <p>Nenhum tenant encontrado para "{{ searchQuery() }}".</p>
-                  <button mat-button color="primary" (click)="searchQuery.set('')">
+                  <button mat-button color="primary" (click)="clearSearch()">
                     Limpar pesquisa
                   </button>
                 } @else {

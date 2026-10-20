@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -16,6 +17,7 @@ import { ApiErrorResponse, PaginationMeta, TenantDto } from '@core/models';
 import { ToastService } from '@core/toast';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog';
 import { MatPaginatorIntlPtBr } from '@shared/paginator/mat-paginator-intl-ptbr';
+import { Subscription, debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { TenantsService } from '../../services/tenants.service';
 
 @Component({
@@ -35,9 +37,7 @@ import { TenantsService } from '../../services/tenants.service';
     MatFormFieldModule,
     MatInputModule,
   ],
-  providers: [
-    { provide: MatPaginatorIntl, useClass: MatPaginatorIntlPtBr },
-  ],
+  providers: [{ provide: MatPaginatorIntl, useClass: MatPaginatorIntlPtBr }],
   templateUrl: './tenant-list.component.html',
   styleUrl: './tenant-list.component.scss',
 })
@@ -47,26 +47,34 @@ export class TenantListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
+  private loadSubscription: Subscription | null = null;
 
   public readonly displayedColumns: string[] = ['name', 'domains', 'created_at', 'actions'];
   public readonly tenants = signal<TenantDto[]>([]);
+  /** Texto digitado no campo de busca. */
+  public readonly searchTerm = signal<string>('');
+  /** Termo efetivamente aplicado na última consulta à API (após o debounce). */
   public readonly searchQuery = signal<string>('');
   public readonly meta = signal<PaginationMeta | null>(null);
   public readonly isLoading = signal<boolean>(false);
   public readonly deletingUuid = signal<string | null>(null);
 
-  public readonly filteredTenants = computed(() => {
-    const query = this.searchQuery().trim().toLowerCase();
-    const list = this.tenants();
-    if (!query) {
-      return list;
-    }
-    return list.filter((t) => {
-      const matchName = t.name.toLowerCase().includes(query);
-      const matchDomain = (t.domains ?? []).some((d) => d.domain.toLowerCase().includes(query));
-      return matchName || matchDomain;
-    });
-  });
+  constructor() {
+    // A busca é feita no servidor, então espera o usuário parar de digitar antes de consultar.
+    toObservable(this.searchTerm)
+      .pipe(
+        skip(1),
+        debounceTime(300),
+        map((term) => term.trim()),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((term) => {
+        this.searchQuery.set(term);
+        this.loadTenants(1);
+      });
+  }
 
   public ngOnInit(): void {
     const createdName = this.route.snapshot.queryParamMap.get('created');
@@ -79,7 +87,11 @@ export class TenantListComponent implements OnInit {
 
   public onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.searchQuery.set(input.value);
+    this.searchTerm.set(input.value);
+  }
+
+  public clearSearch(): void {
+    this.searchTerm.set('');
   }
 
   public getDomainUrl(domain: string): string {
@@ -96,7 +108,9 @@ export class TenantListComponent implements OnInit {
   public loadTenants(page = 1): void {
     this.isLoading.set(true);
 
-    this.tenantsService.getTenants(page).subscribe({
+    // Descarta a resposta anterior para uma busca antiga não sobrescrever a mais recente.
+    this.loadSubscription?.unsubscribe();
+    this.loadSubscription = this.tenantsService.getTenants(page, this.searchQuery()).subscribe({
       next: (response) => {
         this.tenants.set(response.data);
         this.meta.set(response.meta);

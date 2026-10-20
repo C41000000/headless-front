@@ -17,8 +17,11 @@ import { Observable } from 'rxjs';
 export class TenantsService {
   private readonly http = inject(HttpClient);
 
-  public getTenants(page = 1): Observable<PaginatedResponse<TenantDto>> {
-    const params = new HttpParams().set('page', page.toString());
+  public getTenants(page = 1, search = ''): Observable<PaginatedResponse<TenantDto>> {
+    let params = new HttpParams().set('page', page.toString());
+    if (search) {
+      params = params.set('search', search);
+    }
     return this.http.get<PaginatedResponse<TenantDto>>('/api/v1/tenants', { params });
   }
 
@@ -30,8 +33,9 @@ export class TenantsService {
     return this.http.post<TenantDto>('/api/v1/tenants', dto);
   }
 
-  public updateTenant(uuid: string, dto: UpdateTenantDto): Observable<TenantDto> {
-    return this.http.patch<TenantDto>(`/api/v1/tenants/${uuid}`, dto);
+  // O backend responde 204 sem corpo nas atualizações.
+  public updateTenant(uuid: string, dto: UpdateTenantDto): Observable<void> {
+    return this.http.patch<void>(`/api/v1/tenants/${uuid}`, dto);
   }
 
   public deleteTenant(uuid: string): Observable<void> {
@@ -50,8 +54,8 @@ export class TenantsService {
     tenantUuid: string,
     domainUuid: string,
     dto: UpdateDomainDto,
-  ): Observable<DomainDto> {
-    return this.http.patch<DomainDto>(`/api/v1/tenants/${tenantUuid}/domains/${domainUuid}`, dto);
+  ): Observable<void> {
+    return this.http.patch<void>(`/api/v1/tenants/${tenantUuid}/domains/${domainUuid}`, dto);
   }
 
   public deleteDomain(tenantUuid: string, domainUuid: string): Observable<void> {

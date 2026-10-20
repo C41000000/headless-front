@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -64,6 +64,9 @@ export class TenantDetailComponent implements OnInit {
     validators: [Validators.required, Validators.maxLength(255)],
   });
 
+  // Envolve o campo em um formulário para o Enter também salvar.
+  public readonly nameForm = new FormGroup({ name: this.nameControl });
+
   public readonly newDomainControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.pattern(/^[a-z0-9.-]+$/i)],
@@ -109,7 +112,7 @@ export class TenantDetailComponent implements OnInit {
     }
 
     const newName = this.nameControl.value.trim();
-    if (newName === this.tenant()?.name) {
+    if (this.isSavingName() || newName === this.tenant()?.name) {
       return;
     }
 
@@ -117,18 +120,17 @@ export class TenantDetailComponent implements OnInit {
     this.nameValidationErrors.set({});
 
     this.tenantsService.updateTenant(this.tenantUuid, { name: newName }).subscribe({
-      next: (updatedTenant) => {
+      next: () => {
         this.isSavingName.set(false);
-        this.tenant.update((current) => (current ? { ...current, name: updatedTenant.name } : null));
-        this.toastService.success('Nome do tenant atualizado com sucesso!');
+        this.toastService.success(`Tenant "${newName}" atualizado com sucesso!`);
+        this.router.navigate(['/admin/tenants']);
       },
       error: (error: ApiErrorResponse) => {
         this.isSavingName.set(false);
         if (error.errors) {
           this.nameValidationErrors.set(error.errors);
         }
-        const msg = error.message || 'Erro ao atualizar o nome do tenant.';
-        this.toastService.error(msg);
+        this.toastService.error(error.message || 'Erro ao atualizar o nome do tenant.');
       },
     });
   }
@@ -193,12 +195,12 @@ export class TenantDetailComponent implements OnInit {
     this.tenantsService
       .updateDomain(this.tenantUuid, domain.uuid, { domain: updatedDomain })
       .subscribe({
-        next: (savedDomain) => {
+        next: () => {
           this.editingDomainUuid.set(null);
           this.tenant.update((current) => {
             if (!current) return null;
             const updatedList = (current.domains ?? []).map((d) =>
-              d.uuid === domain.uuid ? savedDomain : d,
+              d.uuid === domain.uuid ? { ...d, domain: updatedDomain } : d,
             );
             return { ...current, domains: updatedList };
           });

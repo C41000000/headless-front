@@ -85,7 +85,7 @@ Consequências:
 Formato das respostas:
 - O backend usa `JsonResource::withoutWrapping()`: **objetos e coleções simples vêm sem a chave `data`**.
 - **Listas paginadas** vêm como `PaginatedResponse<T>` (`data`, `links`, `meta`).
-- `DELETE` retorna 204 sem corpo. `POST` de criação retorna 201.
+- `DELETE` e `PATCH` (update) retornam 204 sem corpo: tipe como `Observable<void>` e use os valores enviados para atualizar a tela. `POST` de criação retorna 201 com o recurso.
 - Erros de validação: 422 com `errors: Record<campo, string[]>` (mensagens já em pt-BR). Campos de arrays chegam como `domains.0`.
 - Recursos são identificados por `uuid` (nunca `id`). Datas são strings ISO 8601.
 - PATCH é parcial: envie só os campos alterados.

@@ -20,7 +20,8 @@
         </div>
         <h1 class="page-title">{{ t.name }}</h1>
         <p class="page-subtitle">
-          Criado em {{ t.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em {{ t.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+          Criado em {{ t.created_at | date: 'dd/MM/yyyy HH:mm' }} • Atualizado em
+          {{ t.updated_at | date: 'dd/MM/yyyy HH:mm' }}
         </p>
       </div>
     </div>
@@ -35,7 +36,7 @@
         </mat-card-header>
 
         <mat-card-content class="card-content-spaced">
-          <div class="inline-edit-row">
+          <form class="inline-edit-row" [formGroup]="nameForm" (ngSubmit)="onSaveName()">
             <mat-form-field appearance="outline" class="flex-grow">
               <mat-label>Nome da Empresa / Cliente</mat-label>
               <input
@@ -56,9 +57,9 @@
             <button
               mat-flat-button
               color="primary"
+              type="submit"
               class="action-button-aligned"
               [disabled]="isSavingName() || nameControl.invalid || nameControl.value === t.name"
-              (click)="onSaveName()"
             >
               @if (isSavingName()) {
                 <mat-spinner diameter="18" class="spinner-inline"></mat-spinner>
@@ -67,7 +68,7 @@
               }
               <span>{{ isSavingName() ? 'Salvando...' : 'Atualizar' }}</span>
             </button>
-          </div>
+          </form>
         </mat-card-content>
       </mat-card>
 
@@ -76,7 +77,9 @@
         <mat-card-header>
           <mat-icon mat-card-avatar class="card-avatar">language</mat-icon>
           <mat-card-title>Domínios de Acesso</mat-card-title>
-          <mat-card-subtitle>Hostnames vinculados a este tenant para resolução multi-tenant</mat-card-subtitle>
+          <mat-card-subtitle
+            >Hostnames vinculados a este tenant para resolução multi-tenant</mat-card-subtitle
+          >
         </mat-card-header>
 
         <mat-card-content class="card-content-spaced">
@@ -145,11 +148,7 @@
                       >
                         <mat-icon>check</mat-icon>
                       </button>
-                      <button
-                        mat-icon-button
-                        (click)="cancelEditDomain()"
-                        matTooltip="Cancelar"
-                      >
+                      <button mat-icon-button (click)="cancelEditDomain()" matTooltip="Cancelar">
                         <mat-icon>close</mat-icon>
                       </button>
                     </div>
@@ -188,9 +187,15 @@
                     <button
                       mat-icon-button
                       color="warn"
-                      [disabled]="deletingDomainUuid() === domain.uuid || (t.domains?.length ?? 0) <= 1"
+                      [disabled]="
+                        deletingDomainUuid() === domain.uuid || (t.domains?.length ?? 0) <= 1
+                      "
                       (click)="onDeleteDomain(domain)"
-                      [matTooltip]="(t.domains?.length ?? 0) <= 1 ? 'Não é possível remover o único domínio' : 'Excluir domínio'"
+                      [matTooltip]="
+                        (t.domains?.length ?? 0) <= 1
+                          ? 'Não é possível remover o único domínio'
+                          : 'Excluir domínio'
+                      "
                     >
                       <mat-icon>delete_outline</mat-icon>
                     </button>
@@ -199,7 +204,7 @@
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
         </mat-card-content>

@@ -36,6 +36,14 @@ describe('TenantsService', () => {
     req.flush(mockData);
   });
 
+  it('should send the search term when filtering tenants', () => {
+    service.getTenants(2, 'gama').subscribe();
+
+    const req = httpMock.expectOne('/api/v1/tenants?page=2&search=gama');
+    expect(req.request.method).toBe('GET');
+    req.flush({ data: [], links: {}, meta: {} });
+  });
+
   it('should create tenant', () => {
     const payload = { name: 'New Tenant', domains: ['new.localhost'] };
     const mockRes = { uuid: 'tenant-new', name: 'New Tenant', created_at: '', updated_at: '' };
@@ -52,7 +60,12 @@ describe('TenantsService', () => {
 
   it('should add domain to tenant', () => {
     const payload = { domain: 'new-domain.localhost' };
-    const mockRes = { uuid: 'domain-1', domain: 'new-domain.localhost', created_at: '', updated_at: '' };
+    const mockRes = {
+      uuid: 'domain-1',
+      domain: 'new-domain.localhost',
+      created_at: '',
+      updated_at: '',
+    };
 
     service.addDomain('tenant-uuid', payload).subscribe((res) => {
       expect(res.uuid).toBe('domain-1');
