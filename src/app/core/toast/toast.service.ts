@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastComponent, ToastData } from './toast.component';
 import { Toast, ToastType } from './toast.model';
 
 @Injectable({
@@ -11,16 +12,15 @@ export class ToastService {
   public readonly toasts = this._toasts.asReadonly();
 
   public show(message: string, type: ToastType = 'info', title?: string, duration = 4000): void {
-    const alreadyExists = this._toasts().some(
-      (t) => t.message === message && t.type === type,
-    );
+    const alreadyExists = this._toasts().some((t) => t.message === message && t.type === type);
     if (alreadyExists) {
       return;
     }
 
-    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
-      ? crypto.randomUUID()
-      : Math.random().toString(36).substring(2, 9);
+    const id =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).substring(2, 9);
 
     const newToast: Toast = {
       id,
@@ -32,7 +32,8 @@ export class ToastService {
 
     this._toasts.update((current) => [...current, newToast]);
 
-    this.snackBar.open(message, 'OK', {
+    this.snackBar.openFromComponent<ToastComponent, ToastData>(ToastComponent, {
+      data: { type, message, title },
       duration,
       horizontalPosition: 'end',
       verticalPosition: 'top',

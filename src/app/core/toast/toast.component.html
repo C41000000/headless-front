@@ -1,0 +1,12 @@
+<div class="toast" [attr.role]="data.type === 'error' ? 'alert' : 'status'">
+  <mat-icon class="toast-icon">{{ icon }}</mat-icon>
+  <div class="toast-body">
+    @if (data.title) {
+      <strong class="toast-title">{{ data.title }}</strong>
+    }
+    <span class="toast-message">{{ data.message }}</span>
+  </div>
+  <button mat-icon-button class="toast-close" aria-label="Fechar notificação" (click)="dismiss()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>

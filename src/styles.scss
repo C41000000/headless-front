@@ -7,7 +7,8 @@
   --tenant-font: Roboto, system-ui, -apple-system, sans-serif;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   font-family: var(--tenant-font);
@@ -19,27 +20,33 @@ html, body {
   box-sizing: border-box;
 }
 
-// Custom styling for Angular Material SnackBar types
+// Cores dos toasts (ToastService). Os tokens ficam no container do snackbar,
+// que é criado fora dos componentes; o layout interno fica no ToastComponent.
+.mat-mdc-snack-bar-container {
+  --mat-snack-bar-container-shape: 10px;
+
+  .mat-mdc-snackbar-surface {
+    padding: 0;
+    box-shadow: 0 10px 24px rgb(15 23 42 / 0.18);
+  }
+
+  .mdc-snackbar__label {
+    padding: 0;
+  }
+}
+
 .snackbar-success {
-  --mdc-snackbar-container-color: #166534;
-  --mat-snack-bar-button-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-container-color: #15803d;
 }
 
 .snackbar-error {
-  --mdc-snackbar-container-color: #991b1b;
-  --mat-snack-bar-button-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-container-color: #b91c1c;
 }
 
 .snackbar-warning {
-  --mdc-snackbar-container-color: #b45309;
-  --mat-snack-bar-button-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-container-color: #b45309;
 }
 
 .snackbar-info {
-  --mdc-snackbar-container-color: #0369a1;
-  --mat-snack-bar-button-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-container-color: #0369a1;
 }

@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastComponent } from './toast.component';
 import { ToastService } from './toast.service';
 
 describe('ToastService', () => {
   let service: ToastService;
-  let snackBarMock: { open: () => void };
+  let snackBarMock: { openFromComponent: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    snackBarMock = { open: () => {} };
+    snackBarMock = { openFromComponent: vi.fn() };
     TestBed.configureTestingModule({
       providers: [{ provide: MatSnackBar, useValue: snackBarMock }],
     });
@@ -30,6 +31,13 @@ describe('ToastService', () => {
     expect(service.toasts().length).toBe(1);
     expect(service.toasts()[0].type).toBe('error');
     expect(service.toasts()[0].message).toBe('Ocorreu um erro.');
+    expect(snackBarMock.openFromComponent).toHaveBeenCalledWith(
+      ToastComponent,
+      expect.objectContaining({
+        data: { type: 'error', message: 'Ocorreu um erro.', title: 'Erro' },
+        panelClass: ['snackbar-error'],
+      }),
+    );
   });
 
   it('should remove toast by id', () => {
