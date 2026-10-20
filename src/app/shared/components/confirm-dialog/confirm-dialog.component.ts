@@ -28,7 +28,7 @@ export interface ConfirmDialogData {
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
-      <p style="margin: 0; color: #475569; font-size: 0.95rem; line-height: 1.5;">
+      <p style="margin: 0; color: var(--app-text-secondary); font-size: 0.95rem; line-height: 1.5;">
         {{ data.message }}
       </p>
     </mat-dialog-content>

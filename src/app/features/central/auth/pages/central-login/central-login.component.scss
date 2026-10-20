@@ -4,7 +4,12 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: radial-gradient(circle at 50% 20%, #e0f2fe 0%, #f1f5f9 60%, #e2e8f0 100%);
+  background: radial-gradient(
+    circle at 50% 20%,
+    var(--app-accent-soft) 0%,
+    var(--app-border-subtle) 60%,
+    var(--app-border) 100%
+  );
 }
 
 .login-card {
@@ -12,16 +17,18 @@
   width: 100%;
   padding: 1.5rem 1rem;
   border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  background-color: #ffffff;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  background-color: var(--app-surface);
 
   mat-card-header {
     margin-bottom: 1.5rem;
   }
 
   .login-avatar {
-    background-color: #0284c7;
-    color: #ffffff;
+    background-color: var(--app-accent);
+    color: var(--app-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -37,12 +44,12 @@
   mat-card-title {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--app-text-strong);
   }
 
   mat-card-subtitle {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--app-text-muted);
   }
 }
 

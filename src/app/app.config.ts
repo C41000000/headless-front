@@ -9,6 +9,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideRouter } from '@angular/router';
 import { apiBaseUrlInterceptor, apiErrorInterceptor, authInterceptor } from '@core/http';
 import { VisualIdentityService } from '@core/tenant';
+import { ThemeService } from '@core/theme';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -19,6 +20,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([apiBaseUrlInterceptor, authInterceptor, apiErrorInterceptor]),
     ),
+    // Aplica o tema salvo antes da primeira renderização
+    provideAppInitializer(() => {
+      inject(ThemeService);
+    }),
     provideAppInitializer(() => {
       const visualIdentityService = inject(VisualIdentityService);
       return visualIdentityService.loadVisualIdentity();

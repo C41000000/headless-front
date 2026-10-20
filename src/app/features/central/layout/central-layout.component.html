@@ -1,28 +1,55 @@
-<div class="admin-layout">
-  <mat-toolbar color="primary" class="admin-toolbar">
-    <div class="brand-container">
-      <mat-icon class="brand-icon">hub</mat-icon>
-      <span class="brand-title">Central Admin</span>
-    </div>
+<div class="shell" [class.nav-open]="isNavOpen()">
+  <aside class="sidenav" aria-label="Navegação principal">
+    <a routerLink="/admin/tenants" class="brand">
+      <app-brand-mark [size]="24" />
+      <span class="brand-name">headless</span>
+    </a>
+    <span class="env-label">central · {{ envLabel }}</span>
 
-    <nav class="nav-links">
-      <a mat-button routerLink="/admin/tenants" routerLinkActive="active-nav">
-        <mat-icon>domain</mat-icon>
-        <span>Tenants</span>
-      </a>
+    <nav class="nav">
+      @for (item of navItems(); track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item"
+          #link="routerLinkActive"
+          [attr.aria-current]="link.isActive ? 'page' : null"
+        >
+          <span class="nav-marker" aria-hidden="true"></span>
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+          <kbd class="nav-shortcut" aria-hidden="true">G {{ item.shortcut }}</kbd>
+        </a>
+      }
     </nav>
 
-    <span class="spacer"></span>
+    <div class="sidenav-footer">
+      <button
+        type="button"
+        class="nav-item theme-toggle"
+        (click)="themeService.toggle()"
+        [attr.aria-label]="themeService.isDark() ? 'Usar tema claro' : 'Usar tema escuro'"
+      >
+        <mat-icon class="nav-icon">{{
+          themeService.isDark() ? 'dark_mode' : 'light_mode'
+        }}</mat-icon>
+        <span class="nav-label">{{ themeService.isDark() ? 'Escuro' : 'Claro' }}</span>
+        <mat-icon class="nav-trailing">{{
+          themeService.isDark() ? 'light_mode' : 'dark_mode'
+        }}</mat-icon>
+      </button>
 
-    <div class="user-menu-section">
       @if (authService.currentUser(); as user) {
-        <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
-          <mat-icon>account_circle</mat-icon>
-          <span class="user-name">{{ user.name }}</span>
-          <mat-icon>arrow_drop_down</mat-icon>
+        <button type="button" class="nav-item user-item" [matMenuTriggerFor]="userMenu">
+          <span class="user-avatar" aria-hidden="true">{{ userInitial() }}</span>
+          <span class="user-text">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-role">{{ roleLabel(user.role) }}</span>
+          </span>
+          <mat-icon class="nav-trailing">unfold_more</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu" xPosition="before">
+        <mat-menu #userMenu="matMenu" yPosition="above">
           <div class="menu-user-header">
             <strong>{{ user.name }}</strong>
             <small>{{ user.email }}</small>
@@ -30,14 +57,31 @@
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="onLogout()">
             <mat-icon>logout</mat-icon>
-            <span>Sair do Sistema</span>
+            <span>Sair</span>
           </button>
         </mat-menu>
       }
     </div>
-  </mat-toolbar>
+  </aside>
 
-  <main class="main-content">
-    <router-outlet />
-  </main>
+  <button
+    type="button"
+    class="nav-backdrop"
+    aria-label="Fechar menu"
+    (click)="isNavOpen.set(false)"
+  ></button>
+
+  <div class="content">
+    <header class="mobile-bar">
+      <button mat-icon-button (click)="isNavOpen.set(true)" aria-label="Abrir menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <app-brand-mark [size]="20" />
+      <span class="brand-name">headless</span>
+    </header>
+
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </div>
 </div>

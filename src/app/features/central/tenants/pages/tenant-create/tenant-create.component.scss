@@ -8,7 +8,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: #0284c7;
+  color: var(--app-accent);
   font-weight: 500;
   text-decoration: none;
 }
@@ -17,20 +17,20 @@
   .page-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--app-text-strong);
     margin: 0 0 0.25rem 0;
   }
 
   .page-subtitle {
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--app-text-muted);
     margin: 0;
   }
 }
 
 .form-card {
   border-radius: 12px;
-  background-color: #ffffff;
+  background-color: var(--app-surface);
   padding: 1rem;
 }
 
@@ -49,8 +49,8 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: var(--app-surface-muted);
+  border: 1px solid var(--app-border);
   border-radius: 10px;
 
   .domains-header {
@@ -63,17 +63,17 @@
     .section-title {
       font-size: 1.05rem;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--app-text-strong);
       margin: 0 0 0.2rem 0;
     }
 
     .section-hint {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--app-text-muted);
       margin: 0;
 
       code {
-        background-color: #e2e8f0;
+        background-color: var(--app-border);
         padding: 0.15rem 0.35rem;
         border-radius: 4px;
         font-family: monospace;
@@ -85,7 +85,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #b91c1c;
+    color: var(--app-danger);
     font-size: 0.85rem;
   }
 
@@ -116,7 +116,7 @@
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--app-border-subtle);
 
   .submit-btn {
     height: 44px;

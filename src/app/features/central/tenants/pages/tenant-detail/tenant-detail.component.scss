@@ -8,7 +8,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: #0284c7;
+  color: var(--app-accent);
   font-weight: 500;
   text-decoration: none;
 }
@@ -20,7 +20,7 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: #64748b;
+  color: var(--app-text-muted);
 }
 
 .page-header {
@@ -30,8 +30,8 @@
     gap: 0.25rem;
     font-size: 0.75rem;
     font-family: monospace;
-    background-color: #e2e8f0;
-    color: #475569;
+    background-color: var(--app-border);
+    color: var(--app-text-secondary);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     margin-bottom: 0.5rem;
@@ -46,13 +46,13 @@
   .page-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--app-text-strong);
     margin: 0 0 0.35rem 0;
   }
 
   .page-subtitle {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--app-text-muted);
     margin: 0;
   }
 }
@@ -65,12 +65,12 @@
 
 .detail-card {
   border-radius: 12px;
-  background-color: #ffffff;
+  background-color: var(--app-surface);
   padding: 1rem;
 
   .card-avatar {
-    background-color: #e0f2fe;
-    color: #0284c7;
+    background-color: var(--app-accent-soft);
+    color: var(--app-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,11 +81,11 @@
   mat-card-title {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--app-text-strong);
   }
 
   mat-card-subtitle {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 0.85rem;
   }
 }
@@ -120,8 +120,8 @@
 }
 
 .new-domain-box {
-  background-color: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background-color: var(--app-surface-muted);
+  border: 1px dashed var(--app-border-strong);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1.25rem;
@@ -137,10 +137,10 @@
 
   th.mat-mdc-header-cell {
     font-weight: 600;
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 0.85rem;
     text-transform: uppercase;
-    background-color: #f8fafc;
+    background-color: var(--app-surface-muted);
   }
 
   td.mat-mdc-cell {
@@ -168,7 +168,7 @@
   }
 
   .text-muted {
-    color: #94a3b8;
+    color: var(--app-text-faint);
   }
 
   .text-right {

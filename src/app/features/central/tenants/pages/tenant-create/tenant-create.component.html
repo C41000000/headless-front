@@ -8,7 +8,9 @@
 
   <div class="page-header">
     <h1 class="page-title">Cadastrar Novo Tenant</h1>
-    <p class="page-subtitle">Criação do cliente, provisionamento automático do banco de dados e configuração de domínios</p>
+    <p class="page-subtitle">
+      Criação do cliente, provisionamento automático do banco de dados e configuração de domínios
+    </p>
   </div>
 
   <mat-card class="form-card" appearance="outlined">
@@ -37,7 +39,10 @@
           <div class="domains-header">
             <div>
               <h3 class="section-title">Domínios de Acesso</h3>
-              <p class="section-hint">Identificadores para o roteamento automático do tenant (ex: <code>empresa.app.com</code>)</p>
+              <p class="section-hint">
+                Identificadores para o roteamento automático do tenant (ex:
+                <code>empresa.app.com</code>)
+              </p>
             </div>
 
             <button
@@ -75,7 +80,10 @@
                   @if (control.touched && control.errors?.['required']) {
                     <mat-error>O domínio é obrigatório.</mat-error>
                   } @else if (control.touched && control.errors?.['pattern']) {
-                    <mat-error>Insira um formato de domínio válido (letras, números, hífen e ponto).</mat-error>
+                    <mat-error
+                      >Insira um formato de domínio válido (letras, números, hífen e
+                      ponto).</mat-error
+                    >
                   }
                   @if (validationErrors()['domains.' + $index]) {
                     <mat-error>{{ validationErrors()['domains.' + $index][0] }}</mat-error>
@@ -100,9 +108,7 @@
         </div>
 
         <div class="form-actions">
-          <a mat-button routerLink="/admin/tenants">
-            Cancelar
-          </a>
+          <a mat-button routerLink="/admin/tenants"> Cancelar </a>
           <button
             mat-flat-button
             color="primary"

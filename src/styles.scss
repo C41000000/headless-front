@@ -1,4 +1,89 @@
-@use '@angular/material/prebuilt-themes/azure-blue.css';
+@use '@angular/material' as mat;
+
+// Tema do Material com suporte a claro e escuro: as cores seguem o `color-scheme`
+// do <html>. O ThemeService liga a classe `theme-dark` (só no painel central).
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$orange-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: color-scheme,
+      ),
+      typography: (
+        plain-family: Roboto,
+        brand-family: 'Space Grotesk',
+      ),
+      density: 0,
+    )
+  );
+
+  // Paleta "Forja": cores diferentes em cada modo (claro, escuro).
+  // Primária só na ação principal, item ativo e foco; secundária em links,
+  // domínios, tags e gráficos. Use estas variáveis em vez de cores fixas.
+  --app-primary: light-dark(#d9501c, #ffb547);
+  --app-primary-hover: light-dark(#c2440f, #ffc66e);
+  --app-on-primary: light-dark(#ffffff, #2b1a00);
+  --app-primary-soft: light-dark(#fce9e1, #3a2a10);
+  --app-secondary: light-dark(#0e6f68, #5ee6c8);
+  --app-secondary-soft: light-dark(#ddf1ee, #0f2e2a);
+
+  // Neutros
+  --app-bg: light-dark(#f6f7f9, #0b0e13);
+  --app-surface: light-dark(#ffffff, #11151c);
+  --app-surface-muted: light-dark(#f4f5f7, #161b22);
+  --app-hover: light-dark(rgb(20 23 28 / 0.05), rgb(255 255 255 / 0.05));
+  --app-border-subtle: light-dark(#eef0f3, #1a2029);
+  --app-border: light-dark(#e5e7eb, #262c36);
+  --app-border-strong: light-dark(#d1d5db, #343b47);
+  --app-text-strong: light-dark(#14171c, #f3f4f6);
+  --app-text: light-dark(#2b3038, #e6e8eb);
+  --app-text-secondary: light-dark(#4b5563, #c3c8d0);
+  --app-text-muted: light-dark(#6b7280, #8b93a1);
+  --app-text-faint: light-dark(#9ca3af, #5d6573);
+  --app-danger: light-dark(#dc2626, #f87171);
+
+  // Aliases antigos: telas que usavam o "accent" seguem a secundária
+  --app-accent: var(--app-secondary);
+  --app-accent-soft: var(--app-secondary-soft);
+
+  --app-radius: 10px;
+  --app-font-display: 'Space Grotesk', Roboto, system-ui, sans-serif;
+  --app-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  // O Material passa a usar a Forja (botões, foco, toggles, radios) e os neutros acima
+  @include mat.theme-overrides(
+    (
+      primary: var(--app-primary),
+      on-primary: var(--app-on-primary),
+      primary-container: var(--app-primary-soft),
+      on-primary-container: var(--app-text-strong),
+      secondary: var(--app-secondary),
+      secondary-container: var(--app-secondary-soft),
+      on-secondary-container: var(--app-text-strong),
+      background: var(--app-bg),
+      on-background: var(--app-text),
+      surface: var(--app-surface),
+      on-surface: var(--app-text-strong),
+      on-surface-variant: var(--app-text-muted),
+      surface-container-lowest: var(--app-surface),
+      surface-container-low: var(--app-surface),
+      surface-container: var(--app-surface-muted),
+      surface-container-high: var(--app-surface-muted),
+      surface-container-highest: var(--app-surface-muted),
+      outline: var(--app-border-strong),
+      outline-variant: var(--app-border),
+      corner-small: 6px,
+      corner-medium: var(--app-radius),
+    )
+  );
+}
+
+html.theme-dark {
+  color-scheme: dark;
+}
 
 :root {
   --tenant-primary: #0284c7;
@@ -12,8 +97,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--tenant-font);
-  background-color: #f8f9fa;
-  color: #212529;
+  background-color: var(--app-bg);
+  color: var(--app-text);
 }
 
 * {
@@ -49,4 +134,45 @@ body {
 
 .snackbar-info {
   --mat-snack-bar-container-color: #0369a1;
+}
+
+// Toggle compacto (mat-slide-toggle com class="app-switch" e hideIcon):
+// trilho fino na cor secundária, sem ícone e sem o "crescimento" do M3.
+.app-switch {
+  --mat-slide-toggle-track-width: 32px;
+  --mat-slide-toggle-track-height: 18px;
+  --mat-slide-toggle-track-outline-width: 0;
+  --mat-slide-toggle-selected-track-outline-width: 0;
+  --mat-slide-toggle-handle-width: 18px;
+  --mat-slide-toggle-handle-height: 18px;
+  --mat-slide-toggle-unselected-handle-size: 12px;
+  --mat-slide-toggle-selected-handle-size: 12px;
+  --mat-slide-toggle-pressed-handle-size: 14px;
+  --mat-slide-toggle-unselected-handle-horizontal-margin: 0 3px;
+  --mat-slide-toggle-selected-handle-horizontal-margin: 0 3px;
+  --mat-slide-toggle-unselected-pressed-handle-horizontal-margin: 0 2px;
+  --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 2px;
+  --mat-slide-toggle-handle-elevation-shadow: none;
+  --mat-slide-toggle-state-layer-size: 28px;
+
+  --mat-slide-toggle-unselected-track-color: var(--app-border-strong);
+  --mat-slide-toggle-unselected-hover-track-color: var(--app-border-strong);
+  --mat-slide-toggle-unselected-focus-track-color: var(--app-border-strong);
+  --mat-slide-toggle-unselected-pressed-track-color: var(--app-border-strong);
+  --mat-slide-toggle-unselected-handle-color: var(--app-surface);
+  --mat-slide-toggle-unselected-hover-handle-color: var(--app-surface);
+  --mat-slide-toggle-unselected-focus-handle-color: var(--app-surface);
+  --mat-slide-toggle-unselected-pressed-handle-color: var(--app-surface);
+
+  --mat-slide-toggle-selected-track-color: var(--app-secondary);
+  --mat-slide-toggle-selected-hover-track-color: var(--app-secondary);
+  --mat-slide-toggle-selected-focus-track-color: var(--app-secondary);
+  --mat-slide-toggle-selected-pressed-track-color: var(--app-secondary);
+  --mat-slide-toggle-selected-handle-color: var(--app-surface);
+  --mat-slide-toggle-selected-hover-handle-color: var(--app-surface);
+  --mat-slide-toggle-selected-focus-handle-color: var(--app-surface);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--app-surface);
+
+  --mat-slide-toggle-label-text-size: 0.85rem;
+  --mat-slide-toggle-label-text-color: var(--app-text-secondary);
 }
