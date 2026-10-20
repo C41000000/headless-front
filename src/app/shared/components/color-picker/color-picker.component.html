@@ -1,0 +1,92 @@
+<button
+  type="button"
+  class="swatch"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  [class.empty]="!hasColor()"
+  [style.--swatch-color]="hasColor() ? currentValue() : null"
+  [disabled]="isDisabled()"
+  (click)="toggle()"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="'Escolher ' + label() + (hasColor() ? ' (atual ' + currentValue() + ')' : '')"
+></button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close()"
+  (detach)="close()"
+  (overlayKeydown)="$event.key === 'Escape' && close()"
+>
+  <div class="panel" role="dialog" [attr.aria-label]="'Seletor de ' + label()">
+    <div
+      #svArea
+      class="sv-area"
+      [style.background-color]="hueColor()"
+      tabindex="0"
+      role="slider"
+      [attr.aria-label]="'Saturação e brilho da ' + label()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="(hsv().s * 100).toFixed(0)"
+      [attr.aria-valuetext]="
+        'saturação ' + (hsv().s * 100).toFixed(0) + '%, brilho ' + (hsv().v * 100).toFixed(0) + '%'
+      "
+      (pointerdown)="onSvPointerDown($event)"
+      (pointermove)="onSvPointerMove($event)"
+      (keydown)="onSvKeydown($event)"
+    >
+      <span
+        class="sv-thumb"
+        [style.left.%]="hsv().s * 100"
+        [style.top.%]="(1 - hsv().v) * 100"
+        [style.background-color]="hex()"
+      ></span>
+    </div>
+
+    <input
+      type="range"
+      class="hue"
+      min="0"
+      max="359"
+      step="1"
+      [value]="hsv().h"
+      (input)="onHueInput($event)"
+      [attr.aria-label]="'Matiz da ' + label()"
+    />
+
+    <div class="hex-row">
+      <span class="current" [style.background-color]="hex()"></span>
+      <input
+        type="text"
+        class="hex-input"
+        spellcheck="false"
+        maxlength="9"
+        [value]="hexDraft()"
+        (input)="onHexInput($event)"
+        (keydown.enter)="commitHexDraft(); $event.preventDefault()"
+        (blur)="commitHexDraft()"
+        [attr.aria-label]="'Código hexadecimal da ' + label()"
+        placeholder="#RRGGBB"
+      />
+    </div>
+
+    <div class="presets" role="group" aria-label="Cores sugeridas">
+      @for (color of presets(); track color) {
+        <button
+          type="button"
+          class="preset"
+          [class.selected]="color.toUpperCase() === hex()"
+          [style.background-color]="color"
+          (click)="pickPreset(color)"
+          [attr.aria-label]="'Usar ' + color"
+        ></button>
+      }
+    </div>
+  </div>
+</ng-template>

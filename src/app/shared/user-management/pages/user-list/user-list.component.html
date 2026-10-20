@@ -2,11 +2,16 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Usuários</h1>
-      <p class="page-subtitle">Equipe com acesso ao painel central e seus papéis</p>
+      <p class="page-subtitle">{{ config.subtitle }}</p>
     </div>
 
     @if (canCreate()) {
-      <a mat-flat-button color="primary" routerLink="/admin/users/new" class="create-btn">
+      <a
+        mat-flat-button
+        color="primary"
+        [routerLink]="[config.basePath, 'novo']"
+        class="create-btn"
+      >
         <mat-icon>add</mat-icon>
         <span>Novo Usuário</span>
       </a>
@@ -69,7 +74,7 @@
             <div class="user-info" [class.inactive]="!user.is_active">
               <span class="user-name">
                 @if (user.abilities?.update) {
-                  <a [routerLink]="['/admin/users', user.uuid]">{{ user.name }}</a>
+                  <a [routerLink]="[config.basePath, user.uuid]">{{ user.name }}</a>
                 } @else {
                   {{ user.name }}
                 }
@@ -84,7 +89,7 @@
 
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef class="col-role">Papel</th>
-          <td mat-cell *matCellDef="let user" class="col-role">{{ roleLabel(user.role) }}</td>
+          <td mat-cell *matCellDef="let user" class="col-role">{{ labelFor(user.role) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="status">
@@ -126,7 +131,7 @@
                 @if (user.abilities?.update) {
                   <a
                     mat-icon-button
-                    [routerLink]="['/admin/users', user.uuid]"
+                    [routerLink]="[config.basePath, user.uuid]"
                     matTooltip="Editar usuário"
                     [attr.aria-label]="'Editar ' + user.name"
                     class="action-icon-btn edit-btn"

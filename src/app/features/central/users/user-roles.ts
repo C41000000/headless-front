@@ -1,17 +1,10 @@
-import { CentralRole } from '@core/models';
-
-export interface CentralRoleOption {
-  value: CentralRole;
-  label: string;
-  level: number;
-  description: string;
-}
+import { RoleOption } from '@shared/user-management';
 
 /**
  * Espelha o enum RoleName do backend (nível e permissions de cada papel). A API
  * continua sendo quem valida: isto só serve para rotular e desabilitar opções.
  */
-export const CENTRAL_ROLES: readonly CentralRoleOption[] = [
+export const CENTRAL_ROLES: readonly RoleOption[] = [
   {
     value: 'super-admin',
     label: 'Super admin',
@@ -32,11 +25,3 @@ export const CENTRAL_ROLES: readonly CentralRoleOption[] = [
     description: 'Apenas visualiza usuários, tenants e domínios.',
   },
 ];
-
-export function roleLabel(role: CentralRole | null): string {
-  return CENTRAL_ROLES.find((option) => option.value === role)?.label ?? 'Sem papel';
-}
-
-export function roleLevel(role: CentralRole | null): number {
-  return CENTRAL_ROLES.find((option) => option.value === role)?.level ?? 0;
-}

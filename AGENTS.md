@@ -45,7 +45,11 @@ src/app/
     http/                            # interceptors: base URL, auth, erros
     models/                          # interfaces dos payloads da API (*Dto), reexportadas em index.ts
     toast/                           # ToastService (MatSnackBar)
-  shared/components/                 # componentes reutilizáveis (ex.: ConfirmDialogComponent)
+  core/auth/auth-session.ts          # AUTH_SESSION: sessão do contexto (cada layout fornece a sua)
+  core/auth/permission.guard.ts      # permissionGuard('users.view', fallback) — usa AUTH_SESSION
+  core/theme/                        # ThemeService (claro/escuro, escuro por padrão)
+  shared/components/                 # reutilizáveis: app-shell (navegação lateral), brand-mark, confirm-dialog
+  shared/user-management/            # telas de usuários usadas pelo central e pelo tenant (config USER_MANAGEMENT)
   features/
     central/<modulo>/                # painel central (rotas /admin/...)
       pages/<pagina>/                # componentes roteáveis: .ts + .html + .scss
@@ -72,7 +76,7 @@ Consequências:
 - O `apiErrorInterceptor` converte qualquer erro em `ApiErrorResponse` (`status`, `message`, `errors`, `retryAfter`) e, em 401, limpa o token e redireciona (`/admin/login` no central, `/auth/login` no tenant).
 - Rotas do central ficam sob `/admin` com `centralAuthGuard`/`centralGuestGuard`.
 - Rotas do tenant: `/auth/login` (`tenantGuestGuard`) e `/painel` (`tenantAuthGuard` + `TenantLayoutComponent`); novas páginas do tenant entram como filhas de `painel`.
-- Para testar um tenant no `localhost`, abra `http://localhost:4200/?tenant=empresa.localhost` (o override fica salvo; `setDevTenantOverride(null)` volta ao central).
+- Para testar um tenant localmente, acesse pelo domínio dele em `*.localhost`, ex.: `http://empresa.localhost:4200` (o tenant precisa ter o domínio `empresa.localhost` cadastrado; `*.localhost` resolve para a máquina local e o CORS do backend já aceita `*.localhost:4200`). O `?tenant=` só é útil quando não dá para usar o domínio: ele fica salvo no `localStorage` e `setDevTenantOverride(null)` volta ao central.
 
 ### Endpoints da API (backend `../headless`)
 
@@ -80,12 +84,13 @@ Consequências:
 | :--- | :--- | :--- |
 | Central | `/api/v1` | `auth/login`, `auth/me`, `users`, `tenants`, `tenants/{uuid}/domains` |
 | Tenant público | `/api/v1` | `visual-identity`, `banners?placement=home` |
-| Tenant autenticado | `/api/v1` | `users`, `admin/visual-identity`, `admin/banners` |
+| Tenant autenticado | `/api/v1` | `auth/me`, `users`, `admin/visual-identity`, `admin/banners` |
 
 Formato das respostas:
 - O backend usa `JsonResource::withoutWrapping()`: **objetos e coleções simples vêm sem a chave `data`**.
 - **Listas paginadas** vêm como `PaginatedResponse<T>` (`data`, `links`, `meta`).
-- `DELETE` e `PATCH` (update) retornam 204 sem corpo: tipe como `Observable<void>` e use os valores enviados para atualizar a tela. `POST` de criação retorna 201 com o recurso.
+- `DELETE` e `PATCH` (update) retornam 204 sem corpo: tipe como `Observable<void>` e use os valores enviados para atualizar a tela. Exceções: `PATCH admin/banners/{uuid}` e `PATCH admin/visual-identity` devolvem o recurso (200). `POST` de criação retorna 201 com o recurso.
+- `auth/login` e `auth/me` (central e tenant) devolvem o usuário com `role` e `permissions`; listas de usuários trazem `abilities` (`update`, `toggle_status`, `delete`) por item. Esconda ações com `session.can(...)`/`abilities`, mas a API continua validando.
 - Erros de validação: 422 com `errors: Record<campo, string[]>` (mensagens já em pt-BR). Campos de arrays chegam como `domains.0`.
 - Recursos são identificados por `uuid` (nunca `id`). Datas são strings ISO 8601.
 - PATCH é parcial: envie só os campos alterados.
@@ -125,14 +130,16 @@ Na dúvida sobre um campo ou regra de validação, consulte `../headless/app/Htt
 - Feedback: `ToastService` (`success`, `error`, `info`, `warning`). Confirmação de ações destrutivas: `MatDialog` + `ConfirmDialogComponent` com `color: 'warn'`.
 - Loading: `mat-progress-bar` em listas, `mat-spinner diameter="20"` dentro de botões.
 - Layout de página: `.page-container` > `.page-header` (`.page-title` + `.page-subtitle`) > conteúdo. Copie as classes das páginas de `features/central/tenants/pages/`.
-- Cores do tenant via variáveis CSS (`--tenant-primary`, `--tenant-secondary`, `--tenant-accent`, `--tenant-font`), definidas pela identidade visual. Não fixe cores de marca em componentes do contexto tenant.
+- Cores sempre pelos tokens `--app-*` do `styles.scss` (`--app-primary`, `--app-secondary`, `--app-surface`, `--app-text`, `--app-border`, `--app-danger`, `--app-success`...), que têm valor para claro e escuro via `light-dark()`. Nunca use hex fixo em componentes.
+- No central os tokens seguem a paleta "Forja"; no tenant, o `VisualIdentityService` sobrescreve `--app-primary`/`--app-secondary` com as cores da marca. Fontes: `--app-font-display` (títulos/números) e `--app-font-mono` (uuid, domínios).
+- Toggle compacto: `<mat-slide-toggle class="app-switch" hideIcon>`.
 - Respeite o budget de estilo por componente (aviso em 6 kB, erro em 10 kB).
 
 ### Geral
 - Textos de interface, mensagens e comentários em **português (pt-BR)**; identificadores em inglês.
 - Comentários explicam o *porquê*; mantenha a densidade do código ao redor.
 - Acesso a `window`/`localStorage` sempre protegido (`typeof window !== 'undefined'`), como em `TokenService`.
-- Rotas novas com `loadComponent` (lazy) em `app.routes.ts`.
+- Rotas novas com `loadComponent` (lazy) em `app.routes.ts`. **Caminhos de rota em português** (`/painel/usuarios`, `/painel/identidade-visual`, `/admin/tenants/novo`); termos que a interface já usa como nome ("tenants", "banners") ficam como estão.
 - Commits: Conventional Commits em pt-BR com escopo (`feat(central): ...`, `fix(tenant): ...`).
 
 ---

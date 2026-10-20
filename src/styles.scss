@@ -44,10 +44,14 @@ html {
   --app-text-muted: light-dark(#6b7280, #8b93a1);
   --app-text-faint: light-dark(#9ca3af, #5d6573);
   --app-danger: light-dark(#dc2626, #f87171);
+  --app-success: light-dark(#15803d, #4ade80);
 
   // Aliases antigos: telas que usavam o "accent" seguem a secundária
   --app-accent: var(--app-secondary);
   --app-accent-soft: var(--app-secondary-soft);
+
+  // Trilho do toggle ligado (no tenant vira a primária da marca, ver VisualIdentityService)
+  --app-switch-on: var(--app-secondary);
 
   --app-radius: 10px;
   --app-font-display: 'Space Grotesk', Roboto, system-ui, sans-serif;
@@ -136,6 +140,18 @@ body {
   --mat-snack-bar-container-color: #0369a1;
 }
 
+// Nome da marca na navegação lateral (projetado no app-shell pelos layouts)
+.app-brand-name {
+  font-family: var(--app-font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  color: var(--app-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 // Toggle compacto (mat-slide-toggle com class="app-switch" e hideIcon):
 // trilho fino na cor secundária, sem ícone e sem o "crescimento" do M3.
 .app-switch {
@@ -164,10 +180,10 @@ body {
   --mat-slide-toggle-unselected-focus-handle-color: var(--app-surface);
   --mat-slide-toggle-unselected-pressed-handle-color: var(--app-surface);
 
-  --mat-slide-toggle-selected-track-color: var(--app-secondary);
-  --mat-slide-toggle-selected-hover-track-color: var(--app-secondary);
-  --mat-slide-toggle-selected-focus-track-color: var(--app-secondary);
-  --mat-slide-toggle-selected-pressed-track-color: var(--app-secondary);
+  --mat-slide-toggle-selected-track-color: var(--app-switch-on);
+  --mat-slide-toggle-selected-hover-track-color: var(--app-switch-on);
+  --mat-slide-toggle-selected-focus-track-color: var(--app-switch-on);
+  --mat-slide-toggle-selected-pressed-track-color: var(--app-switch-on);
   --mat-slide-toggle-selected-handle-color: var(--app-surface);
   --mat-slide-toggle-selected-hover-handle-color: var(--app-surface);
   --mat-slide-toggle-selected-focus-handle-color: var(--app-surface);

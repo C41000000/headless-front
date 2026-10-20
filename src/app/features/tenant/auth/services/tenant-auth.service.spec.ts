@@ -40,6 +40,8 @@ describe('TenantAuthService', () => {
         name: 'Admin Empresa',
         email: 'admin@empresa.com',
         is_active: true,
+        role: 'admin',
+        permissions: ['banners.create', 'users.view'],
         created_at: '2026-10-20T10:00:00Z',
         updated_at: '2026-10-20T10:00:00Z',
       },
@@ -51,11 +53,32 @@ describe('TenantAuthService', () => {
       expect(service.isAuthenticated()).toBe(true);
       expect(tokenService.tenantToken()).toBe('tenant-jwt-123');
       expect(tokenService.centralToken()).toBeNull();
+      expect(service.can('banners.create')).toBe(true);
+      expect(service.can('users.delete')).toBe(false);
     });
 
     const req = httpMock.expectOne('/api/v1/auth/login');
     expect(req.request.method).toBe('POST');
     req.flush(mockResponse);
+  });
+
+  it('should load the current tenant user from /auth/me', () => {
+    service.loadCurrentUser().subscribe((user) => {
+      expect(user.role).toBe('employee');
+    });
+
+    httpMock.expectOne('/api/v1/auth/me').flush({
+      uuid: 'user-uuid-1',
+      name: 'Funcionária',
+      email: 'func@empresa.com',
+      is_active: true,
+      role: 'employee',
+      permissions: ['users.view'],
+      created_at: '',
+      updated_at: '',
+    });
+
+    expect(service.can('users.view')).toBe(true);
   });
 
   it('should clear tenant token and user state on logout', () => {

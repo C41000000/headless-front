@@ -1,0 +1,207 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Identidade visual</h1>
+      <p class="page-subtitle">
+        @if (!canUpdate()) {
+          Você pode ver a identidade visual, mas não pode alterá-la.
+        } @else if (identity(); as i) {
+          Cores, logos e fonte do painel e do site · atualizada em
+          {{ i.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+        }
+      </p>
+    </div>
+
+    @if (canUpdate()) {
+      <div class="header-actions">
+        <button mat-button type="button" (click)="onReset()" [disabled]="!isDirty() || isSaving()">
+          Descartar
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          form="visual-identity-form"
+          [disabled]="!isDirty() || isSaving()"
+        >
+          @if (isSaving()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          }
+          <span>Salvar</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando identidade visual...</span>
+    </div>
+  } @else {
+    <div class="form-layout">
+      <form
+        id="visual-identity-form"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        class="form-main"
+      >
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Cores</h2>
+          <div class="colors-grid">
+            @for (field of colorFields; track field.key) {
+              <div class="color-field">
+                <app-color-picker
+                  [label]="field.name"
+                  [color]="formValue()[field.key]"
+                  [disabled]="!canUpdate()"
+                  (colorChange)="onPickColor(field.key, $event)"
+                />
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>{{ field.label }}</mat-label>
+                  <input
+                    matInput
+                    [formControlName]="field.key"
+                    placeholder="#0D6EFD"
+                    class="mono"
+                  />
+                  <mat-hint>{{ field.hint }}</mat-hint>
+                  @if (form.controls[field.key].errors?.['required']) {
+                    <mat-error>Obrigatória.</mat-error>
+                  } @else if (form.controls[field.key].errors?.['pattern']) {
+                    <mat-error>Use #RGB, #RRGGBB ou #RRGGBBAA.</mat-error>
+                  }
+                  @if (validationErrors()[field.key]) {
+                    <mat-error>{{ validationErrors()[field.key][0] }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Logos e favicon</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>Logo</mat-label>
+            <input
+              matInput
+              formControlName="logo_url"
+              placeholder="https://cdn.empresa.com/logo.png"
+            />
+            <mat-icon matPrefix>image</mat-icon>
+            <mat-hint>Usado no painel e no login</mat-hint>
+            @if (form.controls.logo_url.errors?.['pattern']) {
+              <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            }
+            @if (validationErrors()['logo_url']) {
+              <mat-error>{{ validationErrors()['logo_url'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Logo para fundo escuro</mat-label>
+            <input matInput formControlName="logo_dark_url" placeholder="https://..." />
+            <mat-icon matPrefix>dark_mode</mat-icon>
+            @if (form.controls.logo_dark_url.errors?.['pattern']) {
+              <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            }
+            @if (validationErrors()['logo_dark_url']) {
+              <mat-error>{{ validationErrors()['logo_dark_url'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Favicon</mat-label>
+            <input matInput formControlName="favicon_url" placeholder="https://.../favicon.ico" />
+            <mat-icon matPrefix>tab</mat-icon>
+            @if (form.controls.favicon_url.errors?.['pattern']) {
+              <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            }
+            @if (validationErrors()['favicon_url']) {
+              <mat-error>{{ validationErrors()['favicon_url'][0] }}</mat-error>
+            }
+          </mat-form-field>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Tipografia e CSS</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>Fonte</mat-label>
+            <input matInput formControlName="font_family" placeholder="Inter, sans-serif" />
+            <mat-icon matPrefix>text_fields</mat-icon>
+            <mat-hint>A fonte precisa estar carregada no site para aparecer</mat-hint>
+            @if (validationErrors()['font_family']) {
+              <mat-error>{{ validationErrors()['font_family'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>CSS customizado</mat-label>
+            <textarea
+              matInput
+              formControlName="custom_css"
+              rows="6"
+              class="mono"
+              placeholder=":root { --border-radius: 8px; }"
+            ></textarea>
+            <mat-hint align="end">{{ form.controls.custom_css.value.length }}/10000</mat-hint>
+            @if (validationErrors()['custom_css']) {
+              <mat-error>{{ validationErrors()['custom_css'][0] }}</mat-error>
+            }
+          </mat-form-field>
+        </mat-card>
+      </form>
+
+      <aside class="form-side">
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Prévia</h2>
+          <div class="preview" [style.font-family]="preview().font">
+            <div class="preview-bar">
+              @if (preview().logo) {
+                <img [src]="preview().logo" alt="" class="preview-logo" />
+              } @else {
+                <span
+                  class="preview-initial"
+                  [style.background]="preview().primary"
+                  [style.color]="preview().onPrimary"
+                  >{{ tenantInitial() }}</span
+                >
+              }
+              <span class="preview-domain">{{ tenantContext.tenantDomain() }}</span>
+            </div>
+            <div class="preview-body">
+              <strong>Promoção de verão</strong>
+              <span>
+                Até 50% de desconto em
+                <a [style.color]="preview().secondary">toda a loja</a>.
+              </span>
+              <div class="preview-actions">
+                <span
+                  class="preview-button"
+                  [style.background]="preview().primary"
+                  [style.color]="preview().onPrimary"
+                  >Comprar agora</span
+                >
+                <span
+                  class="preview-chip"
+                  [style.color]="preview().accent"
+                  [style.border-color]="preview().accent"
+                  >novo</span
+                >
+              </div>
+            </div>
+            @if (preview().logoDark) {
+              <div class="preview-dark">
+                <img [src]="preview().logoDark" alt="" class="preview-logo" />
+                <span>logo no fundo escuro</span>
+              </div>
+            }
+          </div>
+          <p class="preview-note">
+            Ao salvar, as cores passam a valer neste painel na hora. O CSS customizado não entra na
+            prévia.
+          </p>
+        </mat-card>
+      </aside>
+    </div>
+  }
+</div>

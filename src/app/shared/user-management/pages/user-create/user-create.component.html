@@ -1,6 +1,6 @@
 <div class="page-container">
   <div class="breadcrumb">
-    <a mat-button routerLink="/admin/users">
+    <a mat-button [routerLink]="config.basePath">
       <mat-icon>arrow_back</mat-icon>
       <span>Voltar para Usuários</span>
     </a>
@@ -8,7 +8,7 @@
 
   <div class="page-header">
     <h1 class="page-title">Novo Usuário</h1>
-    <p class="page-subtitle">Dê acesso ao painel central e escolha o papel da pessoa</p>
+    <p class="page-subtitle">Dê acesso ao painel e escolha o papel da pessoa</p>
   </div>
 
   <mat-card class="form-card" appearance="outlined">
@@ -101,7 +101,7 @@
         </section>
 
         <div class="form-actions">
-          <a mat-button routerLink="/admin/users">Cancelar</a>
+          <a mat-button [routerLink]="config.basePath">Cancelar</a>
           <button
             mat-flat-button
             color="primary"

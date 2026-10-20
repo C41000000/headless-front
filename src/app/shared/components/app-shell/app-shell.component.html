@@ -1,0 +1,90 @@
+<div class="shell" [class.nav-open]="isNavOpen()">
+  <aside class="sidenav" aria-label="Navegação principal">
+    <a [routerLink]="homeRoute()" class="brand">
+      <ng-content select="[shellBrand]" />
+    </a>
+    @if (subtitle()) {
+      <span class="env-label">{{ subtitle() }}</span>
+    }
+
+    <nav class="nav">
+      @for (item of visibleItems(); track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          class="nav-item"
+          #link="routerLinkActive"
+          [attr.aria-current]="link.isActive ? 'page' : null"
+        >
+          <span class="nav-marker" aria-hidden="true"></span>
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+          <kbd class="nav-shortcut" aria-hidden="true">G {{ item.shortcut }}</kbd>
+        </a>
+      }
+    </nav>
+
+    <div class="sidenav-footer">
+      <button
+        type="button"
+        class="nav-item theme-toggle"
+        (click)="themeService.toggle()"
+        [attr.aria-label]="themeService.isDark() ? 'Usar tema claro' : 'Usar tema escuro'"
+      >
+        <mat-icon class="nav-icon">{{
+          themeService.isDark() ? 'dark_mode' : 'light_mode'
+        }}</mat-icon>
+        <span class="nav-label">{{ themeService.isDark() ? 'Escuro' : 'Claro' }}</span>
+        <mat-icon class="nav-trailing">{{
+          themeService.isDark() ? 'light_mode' : 'dark_mode'
+        }}</mat-icon>
+      </button>
+
+      @if (session.currentUser(); as user) {
+        <button type="button" class="nav-item user-item" [matMenuTriggerFor]="userMenu">
+          <span class="user-avatar" aria-hidden="true">{{ userInitial() }}</span>
+          <span class="user-text">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-role">{{ roleLabel() }}</span>
+          </span>
+          <mat-icon class="nav-trailing">unfold_more</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" yPosition="above">
+          <div class="menu-user-header">
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }}</small>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onLogout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </aside>
+
+  <button
+    type="button"
+    class="nav-backdrop"
+    aria-label="Fechar menu"
+    (click)="isNavOpen.set(false)"
+  ></button>
+
+  <div class="content">
+    <header class="mobile-bar">
+      <button mat-icon-button (click)="isNavOpen.set(true)" aria-label="Abrir menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a [routerLink]="homeRoute()" class="brand">
+        <ng-content select="[shellBrandCompact]" />
+      </a>
+    </header>
+
+    <main class="main-content">
+      <ng-content />
+    </main>
+  </div>
+</div>

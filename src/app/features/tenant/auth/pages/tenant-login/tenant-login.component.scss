@@ -4,18 +4,18 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background-color: #f1f5f9;
+  background:
+    radial-gradient(circle at 50% 0%, var(--app-primary-soft) 0%, transparent 55%), var(--app-bg);
 }
 
 .login-card {
-  max-width: 440px;
+  max-width: 420px;
   width: 100%;
   padding: 1.5rem 1rem;
   border-radius: 16px;
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.08),
-    0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  background-color: #ffffff;
+  border: 1px solid var(--app-border);
+  background-color: var(--app-surface);
+  box-shadow: 0 20px 40px -24px rgb(0 0 0 / 0.35);
 
   mat-card-header {
     margin-bottom: 1.5rem;
@@ -27,29 +27,29 @@
   }
 
   .login-avatar {
-    background-color: var(--tenant-primary);
-    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
+    border-radius: 12px;
+    background-color: var(--app-primary);
+    color: var(--app-on-primary);
+    font-family: var(--app-font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
   }
 
   mat-card-title {
+    font-family: var(--app-font-display);
     font-size: 1.35rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--app-text-strong);
   }
 
-  mat-card-subtitle {
-    font-size: 0.875rem;
-    color: #64748b;
+  .login-domain {
+    font-family: var(--app-font-mono);
+    font-size: 0.8rem;
+    color: var(--app-text-muted);
   }
 }
 
@@ -64,16 +64,14 @@
 
   .submit-btn {
     margin-top: 0.5rem;
-    height: 48px;
+    height: 46px;
     font-size: 1rem;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: var(--app-radius);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    // Cor de marca do tenant (identidade visual) no lugar da cor do tema
-    --mat-button-filled-container-color: var(--tenant-primary);
   }
 
   .spinner-inline {

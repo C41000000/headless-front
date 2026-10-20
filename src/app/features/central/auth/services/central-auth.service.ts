@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthSession } from '@core/auth/auth-session';
 import { TokenService } from '@core/auth/token.service';
-import { CentralAuthUserDto, LoginCredentialsDto, LoginResponseDto } from '@core/models';
+import { AuthUserDto, LoginCredentialsDto, LoginResponseDto } from '@core/models';
 import { Observable, catchError, of, shareReplay, tap, throwError } from 'rxjs';
 
 const CENTRAL_USER_KEY = 'headless_central_user';
@@ -10,39 +11,37 @@ const CENTRAL_USER_KEY = 'headless_central_user';
 @Injectable({
   providedIn: 'root',
 })
-export class CentralAuthService {
+export class CentralAuthService implements AuthSession {
   private readonly http = inject(HttpClient);
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
 
-  private readonly _currentUser = signal<CentralAuthUserDto | null>(this.readStoredUser());
+  private readonly _currentUser = signal<AuthUserDto | null>(this.readStoredUser());
   public readonly currentUser = this._currentUser.asReadonly();
 
   public readonly isAuthenticated = computed(
     () => this.tokenService.isCentralAuthenticated() && this._currentUser() !== null,
   );
 
-  private currentUserRequest: Observable<CentralAuthUserDto> | null = null;
+  private currentUserRequest: Observable<AuthUserDto> | null = null;
 
-  public login(credentials: LoginCredentialsDto): Observable<LoginResponseDto<CentralAuthUserDto>> {
-    return this.http
-      .post<LoginResponseDto<CentralAuthUserDto>>('/api/v1/auth/login', credentials)
-      .pipe(
-        tap(({ access_token, user }) => {
-          this.tokenService.setCentralToken(access_token);
-          this.setCurrentUser(user);
-          // O login já traz papel e permissions atualizados
-          this.currentUserRequest = of(user);
-        }),
-      );
+  public login(credentials: LoginCredentialsDto): Observable<LoginResponseDto> {
+    return this.http.post<LoginResponseDto>('/api/v1/auth/login', credentials).pipe(
+      tap(({ access_token, user }) => {
+        this.tokenService.setCentralToken(access_token);
+        this.setCurrentUser(user);
+        // O login já traz papel e permissions atualizados
+        this.currentUserRequest = of(user);
+      }),
+    );
   }
 
   /**
    * Busca o usuário logado (papel e permissions) uma vez por carga do app: o que
    * está no localStorage pode ter ficado desatualizado se o papel mudou.
    */
-  public loadCurrentUser(): Observable<CentralAuthUserDto> {
-    this.currentUserRequest ??= this.http.get<CentralAuthUserDto>('/api/v1/auth/me').pipe(
+  public loadCurrentUser(): Observable<AuthUserDto> {
+    this.currentUserRequest ??= this.http.get<AuthUserDto>('/api/v1/auth/me').pipe(
       tap((user) => this.setCurrentUser(user)),
       catchError((error: unknown) => {
         this.currentUserRequest = null;
@@ -71,12 +70,12 @@ export class CentralAuthService {
     this.router.navigate(['/admin/login']);
   }
 
-  private setCurrentUser(user: CentralAuthUserDto): void {
+  private setCurrentUser(user: AuthUserDto): void {
     this._currentUser.set(user);
     this.writeStoredUser(user);
   }
 
-  private readStoredUser(): CentralAuthUserDto | null {
+  private readStoredUser(): AuthUserDto | null {
     if (typeof window === 'undefined' || !window.localStorage) {
       return null;
     }
@@ -85,13 +84,13 @@ export class CentralAuthService {
       return null;
     }
     try {
-      return JSON.parse(raw) as CentralAuthUserDto;
+      return JSON.parse(raw) as AuthUserDto;
     } catch {
       return null;
     }
   }
 
-  private writeStoredUser(user: CentralAuthUserDto): void {
+  private writeStoredUser(user: AuthUserDto): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem(CENTRAL_USER_KEY, JSON.stringify(user));
     }

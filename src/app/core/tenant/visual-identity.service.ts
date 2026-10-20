@@ -3,7 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { VisualIdentityDto } from '@core/models';
 import { Observable, catchError, of, tap } from 'rxjs';
+import { lighten, parseHexColor, readableTextColor, toHex } from './brand-colors';
 import { TenantContextService } from './tenant-context.service';
+
+/** Quanto clarear as cores da marca no tema escuro, para não sumirem no fundo. */
+const DARK_THEME_LIGHTEN = 0.3;
 
 @Injectable({
   providedIn: 'root',
@@ -43,12 +47,19 @@ export class VisualIdentityService {
     );
   }
 
+  /** Guarda e aplica a identidade recém-salva (ex.: pela tela de identidade visual). */
+  public setVisualIdentity(identity: VisualIdentityDto): void {
+    this._visualIdentity.set(identity);
+    this.applyVisualIdentity(identity);
+  }
+
   public applyVisualIdentity(identity: VisualIdentityDto): void {
     if (!this.document) {
       return;
     }
 
     const root = this.document.documentElement;
+    this.applyBrandColors(root, identity);
 
     if (identity.primary_color) {
       root.style.setProperty('--tenant-primary', identity.primary_color);
@@ -82,6 +93,48 @@ export class VisualIdentityService {
         this.document.head.appendChild(styleTag);
       }
       styleTag.textContent = identity.custom_css;
+    }
+  }
+
+  /**
+   * O painel do tenant usa as cores da marca como primária e secundária (os
+   * tokens --app-* do styles.scss). No escuro, a cor é clareada e o texto sobre
+   * a primária segue o contraste de cada tom.
+   */
+  private applyBrandColors(root: HTMLElement, identity: VisualIdentityDto): void {
+    const primary = identity.primary_color ? parseHexColor(identity.primary_color) : null;
+    if (primary) {
+      const primaryDark = lighten(primary, DARK_THEME_LIGHTEN);
+      root.style.setProperty(
+        '--app-primary',
+        `light-dark(${toHex(primary)}, ${toHex(primaryDark)})`,
+      );
+      root.style.setProperty(
+        '--app-primary-hover',
+        `light-dark(${toHex(lighten(primary, 0.12))}, ${toHex(lighten(primary, 0.42))})`,
+      );
+      root.style.setProperty(
+        '--app-on-primary',
+        `light-dark(${readableTextColor(primary)}, ${readableTextColor(primaryDark)})`,
+      );
+      root.style.setProperty(
+        '--app-primary-soft',
+        'color-mix(in srgb, var(--app-primary) 16%, transparent)',
+      );
+      // A secundária de muitas marcas é um cinza; ligado em cinza parece desabilitado
+      root.style.setProperty('--app-switch-on', 'var(--app-primary)');
+    }
+
+    const secondary = identity.secondary_color ? parseHexColor(identity.secondary_color) : null;
+    if (secondary) {
+      root.style.setProperty(
+        '--app-secondary',
+        `light-dark(${toHex(secondary)}, ${toHex(lighten(secondary, DARK_THEME_LIGHTEN + 0.15))})`,
+      );
+      root.style.setProperty(
+        '--app-secondary-soft',
+        'color-mix(in srgb, var(--app-secondary) 16%, transparent)',
+      );
     }
   }
 }

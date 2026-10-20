@@ -1,15 +1,44 @@
 <div class="page-container">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Olá, {{ authService.currentUser()?.name }}</h1>
-      <p class="page-subtitle">Painel administrativo de {{ tenantContext.tenantDomain() }}</p>
-    </div>
-  </div>
+  <header class="hero">
+    <span class="greeting">{{ greeting() }}, {{ firstName().toLowerCase() }} —</span>
+    <h1 class="page-title">Painel de {{ tenantContext.tenantDomain() }}</h1>
+  </header>
 
-  <mat-card class="welcome-card" appearance="outlined">
-    <mat-card-content class="welcome-content">
-      <mat-icon class="welcome-icon">dashboard</mat-icon>
-      <p>Os módulos de gestão do tenant aparecerão aqui.</p>
-    </mat-card-content>
-  </mat-card>
+  @if (canSeeBanners() || canSeeUsers()) {
+    <section class="metrics" aria-label="Resumo">
+      @if (canSeeBanners()) {
+        <div class="metric">
+          <span class="metric-value">{{ bannersLive() ?? '–' }}</span>
+          <span class="metric-label">banners no ar</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ bannersTotal() ?? '–' }}</span>
+          <span class="metric-label">banners cadastrados</span>
+        </div>
+      }
+      @if (canSeeUsers()) {
+        <div class="metric">
+          <span class="metric-value">{{ usersTotal() ?? '–' }}</span>
+          <span class="metric-label">usuários</span>
+        </div>
+      }
+    </section>
+  }
+
+  <section class="shortcuts" aria-label="Atalhos">
+    @for (shortcut of shortcuts(); track shortcut.route) {
+      <a class="shortcut" [routerLink]="shortcut.route">
+        <span class="shortcut-icon"
+          ><mat-icon>{{ shortcut.icon }}</mat-icon></span
+        >
+        <span class="shortcut-text">
+          <strong>{{ shortcut.label }}</strong>
+          <span>{{ shortcut.description }}</span>
+        </span>
+        <mat-icon class="shortcut-arrow">arrow_forward</mat-icon>
+      </a>
+    } @empty {
+      <p class="empty">Seu papel ainda não dá acesso a nenhum módulo. Fale com um admin.</p>
+    }
+  </section>
 </div>

@@ -1,11 +1,13 @@
+export type BannerTarget = '_self' | '_blank';
+
 export interface BannerDto {
   uuid: string;
-  title: string;
+  title: string | null;
   subtitle: string | null;
   image_url: string;
   mobile_image_url: string | null;
   link_url: string | null;
-  target: '_self' | '_blank';
+  target: BannerTarget;
   placement: string;
   order: number;
   is_active: boolean;
@@ -16,29 +18,22 @@ export interface BannerDto {
 }
 
 export interface CreateBannerDto {
-  title: string;
-  subtitle?: string | null;
   image_url: string;
+  title?: string | null;
+  subtitle?: string | null;
   mobile_image_url?: string | null;
   link_url?: string | null;
-  target?: '_self' | '_blank';
-  placement: string;
+  target?: BannerTarget;
+  placement?: string;
   order?: number;
   is_active?: boolean;
   starts_at?: string | null;
   ends_at?: string | null;
 }
 
-export interface UpdateBannerDto {
-  title?: string;
-  subtitle?: string | null;
-  image_url?: string;
-  mobile_image_url?: string | null;
-  link_url?: string | null;
-  target?: '_self' | '_blank';
-  placement?: string;
-  order?: number;
-  is_active?: boolean;
-  starts_at?: string | null;
-  ends_at?: string | null;
+export type UpdateBannerDto = Partial<CreateBannerDto>;
+
+export interface BannerFiltersDto {
+  placement?: string | null;
+  is_active?: boolean | null;
 }

@@ -3,6 +3,10 @@ export interface AuthUserDto {
   name: string;
   email: string;
   is_active: boolean;
+  /** Papel de maior nível (central: super-admin/admin/employee; tenant: admin/employee). */
+  role: string | null;
+  /** Permissions efetivas, ex.: `users.create`. */
+  permissions: string[];
   created_at: string;
   updated_at: string;
 }

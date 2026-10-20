@@ -29,14 +29,6 @@ $mobile-breakpoint: 900px;
   text-decoration: none;
 }
 
-.brand-name {
-  font-family: var(--app-font-display);
-  font-weight: 600;
-  font-size: 1.1rem;
-  letter-spacing: -0.02em;
-  color: var(--app-text-strong);
-}
-
 .env-label {
   padding: 0.15rem 0.5rem 1.25rem 2.6rem;
   font-family: var(--app-font-mono);

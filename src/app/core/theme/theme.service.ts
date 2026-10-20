@@ -1,5 +1,4 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { TenantContextService } from '@core/tenant';
+import { Injectable, computed, effect, signal } from '@angular/core';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -7,24 +6,21 @@ const THEME_KEY = 'headless_theme';
 const DARK_CLASS = 'theme-dark';
 
 /**
- * Tema claro/escuro do painel central (escuro por padrão), salvo no localStorage.
- * No contexto tenant fica sempre claro: o site do tenant usa a identidade visual dele.
+ * Tema claro/escuro dos painéis (escuro por padrão), salvo no localStorage. No
+ * tenant, as cores de marca vêm da identidade visual em qualquer um dos temas.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-  private readonly tenantContext = inject(TenantContextService);
-
   private readonly _theme = signal<ThemeMode>(this.readStoredTheme() ?? 'dark');
   public readonly theme = this._theme.asReadonly();
   public readonly isDark = computed(() => this._theme() === 'dark');
 
   constructor() {
     effect(() => {
-      const dark = this.isDark() && this.tenantContext.isCentral();
       if (typeof document !== 'undefined') {
-        document.documentElement.classList.toggle(DARK_CLASS, dark);
+        document.documentElement.classList.toggle(DARK_CLASS, this.isDark());
       }
     });
   }

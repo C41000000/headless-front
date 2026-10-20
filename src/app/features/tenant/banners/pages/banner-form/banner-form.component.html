@@ -1,0 +1,241 @@
+<div class="page-container">
+  <nav class="breadcrumb" aria-label="Caminho">
+    <a routerLink="/painel/banners">Banners</a>
+    <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    <span>{{ isEdit ? banner()?.title || 'Banner' : 'Novo banner' }}</span>
+  </nav>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        {{ isEdit ? banner()?.title || 'Banner sem título' : 'Novo banner' }}
+        @if (status(); as s) {
+          <span class="status-tag" [attr.data-status]="s">{{ statusLabels[s] }}</span>
+        }
+      </h1>
+      <p class="page-subtitle">
+        @if (isEdit && !canSave()) {
+          Você pode ver este banner, mas não pode editá-lo.
+        } @else {
+          Imagem, texto, link e período em que o banner fica no ar
+        }
+      </p>
+    </div>
+
+    @if (canSave()) {
+      <div class="header-actions">
+        <a mat-button routerLink="/painel/banners">Cancelar</a>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          form="banner-form"
+          [disabled]="isSaving() || isLoading()"
+        >
+          @if (isSaving()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          }
+          <span>{{ isEdit ? 'Salvar' : 'Criar banner' }}</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando banner...</span>
+    </div>
+  } @else {
+    <div class="form-layout">
+      <form
+        id="banner-form"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        class="form-main"
+      >
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Imagens</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>URL da imagem</mat-label>
+            <input
+              matInput
+              formControlName="image_url"
+              placeholder="https://cdn.empresa.com/banners/hero.webp"
+              (input)="onImageUrlInput()"
+            />
+            <mat-icon matPrefix>image</mat-icon>
+            @if (form.controls.image_url.touched && form.controls.image_url.errors?.['required']) {
+              <mat-error>A imagem é obrigatória.</mat-error>
+            } @else if (form.controls.image_url.errors?.['pattern']) {
+              <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            }
+            @if (validationErrors()['image_url']) {
+              <mat-error>{{ validationErrors()['image_url'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>URL da imagem para celular (opcional)</mat-label>
+            <input matInput formControlName="mobile_image_url" placeholder="https://..." />
+            <mat-icon matPrefix>smartphone</mat-icon>
+            @if (form.controls.mobile_image_url.errors?.['pattern']) {
+              <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            }
+            @if (validationErrors()['mobile_image_url']) {
+              <mat-error>{{ validationErrors()['mobile_image_url'][0] }}</mat-error>
+            }
+          </mat-form-field>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Conteúdo</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>Título (opcional)</mat-label>
+            <input matInput formControlName="title" placeholder="Grande promoção de verão" />
+            @if (validationErrors()['title']) {
+              <mat-error>{{ validationErrors()['title'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Subtítulo (opcional)</mat-label>
+            <textarea
+              matInput
+              formControlName="subtitle"
+              rows="2"
+              placeholder="Descontos de até 50% em toda a loja"
+            ></textarea>
+            <mat-hint align="end">{{ form.controls.subtitle.value.length }}/255</mat-hint>
+            @if (form.controls.subtitle.errors?.['maxlength']) {
+              <mat-error>Use no máximo 255 caracteres.</mat-error>
+            }
+            @if (validationErrors()['subtitle']) {
+              <mat-error>{{ validationErrors()['subtitle'][0] }}</mat-error>
+            }
+          </mat-form-field>
+          <div class="row">
+            <mat-form-field appearance="outline" class="grow" subscriptSizing="dynamic">
+              <mat-label>Link ao clicar (opcional)</mat-label>
+              <input matInput formControlName="link_url" placeholder="https://empresa.com/promo" />
+              <mat-icon matPrefix>link</mat-icon>
+              @if (form.controls.link_url.errors?.['pattern']) {
+                <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+              }
+              @if (validationErrors()['link_url']) {
+                <mat-error>{{ validationErrors()['link_url'][0] }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="target-field">
+              <mat-label>Abrir em</mat-label>
+              <mat-select formControlName="target">
+                <mat-option value="_self">Mesma aba</mat-option>
+                <mat-option value="_blank">Nova aba</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Exibição</h2>
+          <div class="row">
+            <mat-form-field appearance="outline" class="grow" subscriptSizing="dynamic">
+              <mat-label>Posição</mat-label>
+              <input matInput formControlName="placement" [matAutocomplete]="placementAuto" />
+              <mat-autocomplete #placementAuto="matAutocomplete">
+                @for (placement of placements; track placement) {
+                  <mat-option [value]="placement">{{ placement }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-hint>Onde o site exibe o banner, ex.: home, sidebar</mat-hint>
+              @if (validationErrors()['placement']) {
+                <mat-error>{{ validationErrors()['placement'][0] }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="order-field" subscriptSizing="dynamic">
+              <mat-label>Ordem</mat-label>
+              <input matInput type="number" min="0" formControlName="order" />
+              <mat-hint>Menor aparece antes</mat-hint>
+              @if (form.controls.order.errors?.['min']) {
+                <mat-error>Use 0 ou mais.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="row">
+            <mat-form-field appearance="outline" class="grow" subscriptSizing="dynamic">
+              <mat-label>No ar a partir de</mat-label>
+              <input matInput type="datetime-local" formControlName="starts_at" />
+              <mat-hint>Vazio: imediatamente</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="grow" subscriptSizing="dynamic">
+              <mat-label>Sai do ar em</mat-label>
+              <input matInput type="datetime-local" formControlName="ends_at" />
+              <mat-hint>Vazio: sem prazo</mat-hint>
+              @if (validationErrors()['ends_at']) {
+                <mat-error>{{ validationErrors()['ends_at'][0] }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          @if (form.errors?.['endsBeforeStart']) {
+            <p class="field-error">O fim precisa ser igual ou depois do início.</p>
+          }
+          <mat-slide-toggle class="app-switch" hideIcon formControlName="is_active">
+            Banner ativo
+          </mat-slide-toggle>
+        </mat-card>
+      </form>
+
+      <aside class="form-side">
+        <mat-card appearance="outlined" class="section-card">
+          <h2 class="section-title">Prévia</h2>
+          <div class="preview" [class.empty]="!preview().image || previewBroken()">
+            @if (preview().image && !previewBroken()) {
+              <img [src]="preview().image" alt="" (error)="onPreviewError()" />
+            } @else {
+              <mat-icon>{{ previewBroken() ? 'broken_image' : 'image' }}</mat-icon>
+              <span>{{
+                previewBroken() ? 'Não foi possível carregar a imagem' : 'Informe a URL da imagem'
+              }}</span>
+            }
+            @if (preview().title || preview().subtitle) {
+              <div class="preview-caption">
+                @if (preview().title) {
+                  <strong>{{ preview().title }}</strong>
+                }
+                @if (preview().subtitle) {
+                  <span>{{ preview().subtitle }}</span>
+                }
+              </div>
+            }
+          </div>
+        </mat-card>
+
+        @if (banner(); as b) {
+          <mat-card appearance="outlined" class="section-card meta">
+            <div>
+              <span class="meta-label">UUID</span>
+              <span class="mono">{{ b.uuid }}</span>
+            </div>
+            <div>
+              <span class="meta-label">Criado em</span>
+              {{ b.created_at | date: 'dd/MM/yyyy HH:mm' }}
+            </div>
+            <div>
+              <span class="meta-label">Atualizado em</span>
+              {{ b.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+            </div>
+          </mat-card>
+        }
+
+        @if (canDelete()) {
+          <div class="danger-zone">
+            <strong>Zona de perigo</strong>
+            <p>Excluir tira o banner do ar imediatamente.</p>
+            <button mat-stroked-button type="button" (click)="onDelete()" [disabled]="isDeleting()">
+              Excluir banner
+            </button>
+          </div>
+        }
+      </aside>
+    </div>
+  }
+</div>

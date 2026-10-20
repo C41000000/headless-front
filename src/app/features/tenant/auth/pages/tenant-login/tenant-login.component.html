@@ -4,12 +4,10 @@
       @if (visualIdentityService.visualIdentity()?.logo_url; as logoUrl) {
         <img mat-card-avatar class="login-logo" [src]="logoUrl" alt="Logo" />
       } @else {
-        <div mat-card-avatar class="login-avatar">
-          <mat-icon>storefront</mat-icon>
-        </div>
+        <div mat-card-avatar class="login-avatar" aria-hidden="true">{{ tenantInitial() }}</div>
       }
-      <mat-card-title>Acesso ao Painel</mat-card-title>
-      <mat-card-subtitle>{{ tenantContext.tenantDomain() }}</mat-card-subtitle>
+      <mat-card-title>Entrar no painel</mat-card-title>
+      <mat-card-subtitle class="login-domain">{{ tenantContext.tenantDomain() }}</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>

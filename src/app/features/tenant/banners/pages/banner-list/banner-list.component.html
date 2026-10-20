@@ -1,0 +1,196 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        Banners
+        @if (!isLoading()) {
+          <span class="count-pill">{{ banners().length }}</span>
+        }
+      </h1>
+      <p class="page-subtitle">
+        {{ liveCount() }} no ar agora · ordem de exibição definida pelo campo "ordem"
+      </p>
+    </div>
+
+    @if (canCreate()) {
+      <a mat-flat-button color="primary" routerLink="/painel/banners/novo" class="create-btn">
+        <mat-icon>add</mat-icon>
+        <span>Novo Banner</span>
+      </a>
+    }
+  </div>
+
+  <mat-card class="table-card" appearance="outlined">
+    <div class="filters-toolbar">
+      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-icon matPrefix class="search-icon">search</mat-icon>
+        <input
+          matInput
+          type="text"
+          placeholder="Buscar por título..."
+          [value]="search()"
+          (input)="onSearch($event)"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Posição</mat-label>
+        <mat-select [value]="placementFilter()" (valueChange)="placementFilter.set($event)">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (placement of placements(); track placement) {
+            <mat-option [value]="placement">{{ placement }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Situação</mat-label>
+        <mat-select [value]="statusFilter()" (valueChange)="statusFilter.set($event)">
+          <mat-option value="all">Todas</mat-option>
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="filteredBanners()" class="mat-elevation-z0 data-table">
+        <ng-container matColumnDef="banner">
+          <th mat-header-cell *matHeaderCellDef class="col-banner">Banner</th>
+          <td mat-cell *matCellDef="let banner" class="col-banner">
+            <div class="banner-info">
+              @if (brokenImages().has(banner.uuid)) {
+                <span class="thumb thumb-broken" matTooltip="Não foi possível carregar a imagem">
+                  <mat-icon>broken_image</mat-icon>
+                </span>
+              } @else {
+                <img
+                  class="thumb"
+                  [src]="banner.image_url"
+                  alt=""
+                  loading="lazy"
+                  (error)="onImageError(banner.uuid)"
+                />
+              }
+              <div class="banner-text">
+                <a [routerLink]="['/painel/banners', banner.uuid]" class="banner-title">
+                  {{ banner.title || 'Sem título' }}
+                </a>
+                @if (banner.subtitle) {
+                  <span class="banner-subtitle">{{ banner.subtitle }}</span>
+                }
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="placement">
+          <th mat-header-cell *matHeaderCellDef>Posição</th>
+          <td mat-cell *matCellDef="let banner">
+            <span class="mono">{{ banner.placement }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schedule">
+          <th mat-header-cell *matHeaderCellDef class="col-schedule">Vigência</th>
+          <td mat-cell *matCellDef="let banner" class="col-schedule">
+            <span class="status-tag" [attr.data-status]="statusOf(banner)">
+              {{ statusLabels[statusOf(banner)] }}
+            </span>
+            <span class="period">
+              @if (banner.starts_at && banner.ends_at) {
+                {{ banner.starts_at | date: 'dd/MM/yy HH:mm' }} –
+                {{ banner.ends_at | date: 'dd/MM/yy HH:mm' }}
+              } @else if (banner.starts_at) {
+                a partir de {{ banner.starts_at | date: 'dd/MM/yy HH:mm' }}
+              } @else if (banner.ends_at) {
+                até {{ banner.ends_at | date: 'dd/MM/yy HH:mm' }}
+              } @else {
+                sem prazo
+              }
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="order">
+          <th mat-header-cell *matHeaderCellDef class="col-order">Ordem</th>
+          <td mat-cell *matCellDef="let banner" class="col-order mono">{{ banner.order }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef class="col-active">Ativo</th>
+          <td mat-cell *matCellDef="let banner" class="col-active">
+            <mat-slide-toggle
+              class="app-switch"
+              hideIcon
+              [checked]="banner.is_active"
+              [disabled]="!canUpdate() || busyUuid() === banner.uuid"
+              (change)="onToggleActive(banner, $event)"
+              [attr.aria-label]="
+                (banner.is_active ? 'Desativar ' : 'Ativar ') + (banner.title || 'banner')
+              "
+            ></mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">Ações</th>
+          <td mat-cell *matCellDef="let banner" class="col-actions">
+            <div class="actions-group">
+              <a
+                mat-icon-button
+                [routerLink]="['/painel/banners', banner.uuid]"
+                [matTooltip]="canUpdate() ? 'Editar banner' : 'Ver banner'"
+                [attr.aria-label]="(canUpdate() ? 'Editar ' : 'Ver ') + (banner.title || 'banner')"
+                class="action-icon-btn edit-btn"
+              >
+                <mat-icon>{{ canUpdate() ? 'edit' : 'visibility' }}</mat-icon>
+              </a>
+              @if (canDelete()) {
+                <button
+                  mat-icon-button
+                  [disabled]="busyUuid() === banner.uuid"
+                  (click)="onDelete(banner)"
+                  matTooltip="Excluir banner"
+                  [attr.aria-label]="'Excluir ' + (banner.title || 'banner')"
+                  class="action-icon-btn delete-btn"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="banner-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-table" [attr.colspan]="displayedColumns.length">
+            @if (!isLoading()) {
+              <div class="empty-state">
+                <mat-icon class="empty-icon">view_carousel</mat-icon>
+                @if (hasFilters()) {
+                  <p>Nenhum banner encontrado com esses filtros.</p>
+                  <button mat-button (click)="clearFilters()">Limpar filtros</button>
+                } @else {
+                  <p>Nenhum banner cadastrado.</p>
+                  @if (canCreate()) {
+                    <a mat-stroked-button routerLink="/painel/banners/novo"
+                      >Criar o primeiro banner</a
+                    >
+                  }
+                }
+              </div>
+            }
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card>
+</div>

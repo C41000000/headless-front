@@ -8,11 +8,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { Router, RouterLink } from '@angular/router';
-import { ApiErrorResponse, CentralRole } from '@core/models';
+import { ApiErrorResponse } from '@core/models';
 import { ToastService } from '@core/toast';
-import { CentralAuthService } from '../../../auth/services/central-auth.service';
-import { UsersService } from '../../services/users.service';
-import { CENTRAL_ROLES, roleLevel } from '../../user-roles';
+import { AUTH_SESSION } from '@core/auth/auth-session';
+import { USER_MANAGEMENT, findRole, roleLevel } from '../../user-management.config';
+import { UsersService } from '../../users.service';
 
 @Component({
   selector: 'app-user-create',
@@ -34,11 +34,12 @@ import { CENTRAL_ROLES, roleLevel } from '../../user-roles';
 export class UserCreateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly usersService = inject(UsersService);
-  private readonly authService = inject(CentralAuthService);
+  private readonly session = inject(AUTH_SESSION);
+  protected readonly config = inject(USER_MANAGEMENT);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
-  protected readonly roles = CENTRAL_ROLES;
+  protected readonly roles = this.config.roles;
 
   public readonly isLoading = signal<boolean>(false);
   public readonly hidePassword = signal<boolean>(true);
@@ -46,18 +47,18 @@ export class UserCreateComponent {
 
   /** Só dá para atribuir papéis de nível igual ou menor que o seu (a API devolve 403 nos demais). */
   public readonly ownLevel = computed(() =>
-    roleLevel(this.authService.currentUser()?.role ?? null),
+    roleLevel(this.roles, this.session.currentUser()?.role),
   );
 
   public readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(255)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    role: this.fb.nonNullable.control<CentralRole>('employee', Validators.required),
+    role: this.fb.nonNullable.control<string>(this.config.defaultRole, Validators.required),
   });
 
-  public roleDescription(role: CentralRole): string {
-    return this.roles.find((option) => option.value === role)?.description ?? '';
+  public roleDescription(role: string): string {
+    return findRole(this.roles, role)?.description ?? '';
   }
 
   public onSubmit(): void {
@@ -86,7 +87,7 @@ export class UserCreateComponent {
         next: (user) => {
           this.isLoading.set(false);
           this.toastService.success(`Usuário "${user.name}" criado com sucesso!`);
-          this.router.navigate(['/admin/users']);
+          this.router.navigate([this.config.basePath]);
         },
         error: (error: ApiErrorResponse) => {
           this.isLoading.set(false);

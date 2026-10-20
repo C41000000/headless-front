@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -34,6 +34,10 @@ export class TenantLoginComponent {
   private readonly router = inject(Router);
   protected readonly tenantContext = inject(TenantContextService);
   protected readonly visualIdentityService = inject(VisualIdentityService);
+
+  protected readonly tenantInitial = computed(
+    () => this.tenantContext.tenantDomain()?.charAt(0).toUpperCase() ?? 'T',
+  );
 
   public readonly isLoading = signal<boolean>(false);
   public readonly hidePassword = signal<boolean>(true);

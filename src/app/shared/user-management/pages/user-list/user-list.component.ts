@@ -14,14 +14,14 @@ import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/sl
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { ApiErrorResponse, CentralRole, PaginationMeta, UserDto } from '@core/models';
+import { ApiErrorResponse, PaginationMeta, UserDto } from '@core/models';
 import { ToastService } from '@core/toast';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog';
 import { MatPaginatorIntlPtBr } from '@shared/paginator/mat-paginator-intl-ptbr';
 import { Subscription, debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
-import { CentralAuthService } from '../../../auth/services/central-auth.service';
-import { UsersService } from '../../services/users.service';
-import { CENTRAL_ROLES, roleLabel } from '../../user-roles';
+import { AUTH_SESSION } from '@core/auth/auth-session';
+import { USER_MANAGEMENT, roleLabel } from '../../user-management.config';
+import { UsersService } from '../../users.service';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
@@ -49,14 +49,14 @@ type StatusFilter = 'all' | 'active' | 'inactive';
 })
 export class UserListComponent implements OnInit {
   private readonly usersService = inject(UsersService);
-  private readonly authService = inject(CentralAuthService);
+  private readonly session = inject(AUTH_SESSION);
+  protected readonly config = inject(USER_MANAGEMENT);
   private readonly toastService = inject(ToastService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private loadSubscription: Subscription | null = null;
 
-  protected readonly roles = CENTRAL_ROLES;
-  protected readonly roleLabel = roleLabel;
+  protected readonly roles = this.config.roles;
 
   public readonly displayedColumns: string[] = ['name', 'role', 'status', 'created_at', 'actions'];
   public readonly users = signal<UserDto[]>([]);
@@ -68,11 +68,11 @@ export class UserListComponent implements OnInit {
   public readonly searchTerm = signal<string>('');
   /** Termo efetivamente aplicado na última consulta à API (após o debounce). */
   public readonly searchQuery = signal<string>('');
-  public readonly roleFilter = signal<CentralRole | null>(null);
+  public readonly roleFilter = signal<string | null>(null);
   public readonly statusFilter = signal<StatusFilter>('all');
 
-  public readonly currentUserUuid = computed(() => this.authService.currentUser()?.uuid ?? null);
-  public readonly canCreate = computed(() => this.authService.can('users.create'));
+  public readonly currentUserUuid = computed(() => this.session.currentUser()?.uuid ?? null);
+  public readonly canCreate = computed(() => this.session.can('users.create'));
   public readonly hasFilters = computed(
     () => !!this.searchQuery() || this.roleFilter() !== null || this.statusFilter() !== 'all',
   );
@@ -101,7 +101,7 @@ export class UserListComponent implements OnInit {
     this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
-  public onRoleFilterChange(role: CentralRole | null): void {
+  public onRoleFilterChange(role: string | null): void {
     this.roleFilter.set(role);
     this.loadUsers(1);
   }
@@ -117,6 +117,10 @@ export class UserListComponent implements OnInit {
     this.roleFilter.set(null);
     this.statusFilter.set('all');
     this.loadUsers(1);
+  }
+
+  public labelFor(role: string | null): string {
+    return roleLabel(this.roles, role);
   }
 
   public hasAnyAbility(user: UserDto): boolean {

@@ -1,14 +1,56 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { AUTH_SESSION } from '@core/auth/auth-session';
+import { permissionGuard } from '@core/auth/permission.guard';
 import { TenantContextService } from '@core/tenant';
+import { USER_MANAGEMENT, UserManagementConfig } from '@shared/user-management';
+import { CentralAuthService } from './features/central/auth/services/central-auth.service';
+import { CENTRAL_ROLES } from './features/central/users/user-roles';
+import { TenantAuthService } from './features/tenant/auth/services/tenant-auth.service';
+import { TENANT_ROLES } from './features/tenant/users/user-roles';
 import { centralAuthGuard } from './features/central/auth/guards/central-auth.guard';
 import { centralGuestGuard } from './features/central/auth/guards/central-guest.guard';
-import { centralPermissionGuard } from './features/central/users/guards/central-permission.guard';
 import { tenantAuthGuard } from './features/tenant/auth/guards/tenant-auth.guard';
 import { tenantGuestGuard } from './features/tenant/auth/guards/tenant-guest.guard';
 
 // O mesmo build atende o central e os tenants: a raiz depende do domínio acessado
 const contextHome = () => (inject(TenantContextService).isTenant() ? 'painel' : 'admin/tenants');
+
+/** Rotas de usuários (lista, criação e edição), iguais no central e no tenant. */
+function userRoutes(config: UserManagementConfig, fallbackUrl: string): Routes {
+  return [
+    {
+      path: 'usuarios',
+      providers: [{ provide: USER_MANAGEMENT, useValue: config }],
+      children: [
+        {
+          path: '',
+          canActivate: [permissionGuard('users.view', fallbackUrl)],
+          loadComponent: () =>
+            import('@shared/user-management/pages/user-list/user-list.component').then(
+              (m) => m.UserListComponent,
+            ),
+        },
+        {
+          path: 'novo',
+          canActivate: [permissionGuard('users.create', fallbackUrl)],
+          loadComponent: () =>
+            import('@shared/user-management/pages/user-create/user-create.component').then(
+              (m) => m.UserCreateComponent,
+            ),
+        },
+        {
+          path: ':uuid',
+          canActivate: [permissionGuard('users.view', fallbackUrl)],
+          loadComponent: () =>
+            import('@shared/user-management/pages/user-detail/user-detail.component').then(
+              (m) => m.UserDetailComponent,
+            ),
+        },
+      ],
+    },
+  ];
+}
 
 export const routes: Routes = [
   {
@@ -22,6 +64,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [centralAuthGuard],
+    providers: [{ provide: AUTH_SESSION, useExisting: CentralAuthService }],
     loadComponent: () =>
       import('./features/central/layout/central-layout.component').then(
         (m) => m.CentralLayoutComponent,
@@ -40,7 +83,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'tenants/new',
+        path: 'tenants/novo',
         loadComponent: () =>
           import('./features/central/tenants/pages/tenant-create/tenant-create.component').then(
             (m) => m.TenantCreateComponent,
@@ -53,30 +96,15 @@ export const routes: Routes = [
             (m) => m.TenantDetailComponent,
           ),
       },
-      {
-        path: 'users',
-        canActivate: [centralPermissionGuard('users.view')],
-        loadComponent: () =>
-          import('./features/central/users/pages/user-list/user-list.component').then(
-            (m) => m.UserListComponent,
-          ),
-      },
-      {
-        path: 'users/new',
-        canActivate: [centralPermissionGuard('users.create')],
-        loadComponent: () =>
-          import('./features/central/users/pages/user-create/user-create.component').then(
-            (m) => m.UserCreateComponent,
-          ),
-      },
-      {
-        path: 'users/:uuid',
-        canActivate: [centralPermissionGuard('users.view')],
-        loadComponent: () =>
-          import('./features/central/users/pages/user-detail/user-detail.component').then(
-            (m) => m.UserDetailComponent,
-          ),
-      },
+      ...userRoutes(
+        {
+          basePath: '/admin/usuarios',
+          subtitle: 'Equipe com acesso ao painel central e seus papéis',
+          roles: CENTRAL_ROLES,
+          defaultRole: 'employee',
+        },
+        '/admin/tenants',
+      ),
     ],
   },
   {
@@ -90,6 +118,7 @@ export const routes: Routes = [
   {
     path: 'painel',
     canActivate: [tenantAuthGuard],
+    providers: [{ provide: AUTH_SESSION, useExisting: TenantAuthService }],
     loadComponent: () =>
       import('./features/tenant/layout/tenant-layout.component').then(
         (m) => m.TenantLayoutComponent,
@@ -97,9 +126,51 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        pathMatch: 'full',
         loadComponent: () =>
           import('./features/tenant/home/pages/tenant-home/tenant-home.component').then(
             (m) => m.TenantHomeComponent,
+          ),
+      },
+      ...userRoutes(
+        {
+          basePath: '/painel/usuarios',
+          subtitle: 'Equipe com acesso ao painel e seus papéis',
+          roles: TENANT_ROLES,
+          defaultRole: 'employee',
+        },
+        '/painel',
+      ),
+      {
+        path: 'banners',
+        canActivate: [permissionGuard('banners.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/banners/pages/banner-list/banner-list.component').then(
+            (m) => m.BannerListComponent,
+          ),
+      },
+      {
+        path: 'banners/novo',
+        canActivate: [permissionGuard('banners.create', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/banners/pages/banner-form/banner-form.component').then(
+            (m) => m.BannerFormComponent,
+          ),
+      },
+      {
+        path: 'banners/:uuid',
+        canActivate: [permissionGuard('banners.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/banners/pages/banner-form/banner-form.component').then(
+            (m) => m.BannerFormComponent,
+          ),
+      },
+      {
+        path: 'identidade-visual',
+        canActivate: [permissionGuard('visual-identity.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/visual-identity/pages/visual-identity/visual-identity.component').then(
+            (m) => m.VisualIdentityComponent,
           ),
       },
     ],

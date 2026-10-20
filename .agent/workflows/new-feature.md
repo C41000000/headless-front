@@ -19,7 +19,7 @@ Abaixo, `{ctx}` = `central` ou `tenant`, `{modulo}` = recurso no plural em kebab
 4. **Página de lista** `pages/{item}-list/`: `mat-table`, `mat-progress-bar`, linha `*matNoDataRow` com estado vazio, `mat-paginator` se paginado, exclusão com `ConfirmDialogComponent` + toast.
 5. **Página de criação** `pages/{item}-create/`: Reactive Form com validadores iguais ao FormRequest, `validationErrors` para 422, spinner no botão, redireciona para a lista ao salvar.
 6. **Página de detalhe/edição** `pages/{item}-detail/` (se aplicável): carrega por `uuid` da rota, PATCH só com campos alterados.
-7. **Rotas** em `app.routes.ts` com `loadComponent`, dentro do layout/guard do contexto. Ordem: `{modulo}`, `{modulo}/new`, `{modulo}/:uuid`.
+7. **Rotas** em `app.routes.ts` com `loadComponent`, dentro do layout/guard do contexto, **com caminhos em português** (ex.: `usuarios`, `identidade-visual`). Ordem: `{modulo}`, `{modulo}/novo`, `{modulo}/:uuid`.
 8. **Navegação**: adicione o link no layout do contexto (ex.: `central-layout.component.html`).
 9. Execute o workflow `/check` e corrija tudo até passar.
 10. Mostre ao usuário um resumo dos arquivos criados e das rotas novas.
