@@ -271,7 +271,8 @@
     }
   }
 
-  .col-featured {
+  th.col-featured,
+  td.col-featured {
     width: 80px;
     text-align: center;
 
@@ -283,20 +284,28 @@
     }
   }
 
-  .col-active {
+  th.col-active,
+  td.col-active {
     width: 80px;
+    text-align: center;
   }
 
-  .col-actions {
-    min-width: 110px;
-    white-space: nowrap;
+  .col-active .app-switch {
+    display: inline-flex;
+    vertical-align: middle;
+  }
+
+  th.col-actions,
+  td.col-actions {
+    width: 110px;
+    text-align: right;
   }
 
   .actions-group {
     display: inline-flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 4px;
-    margin-left: -8px;
 
     .action-icon-btn {
       width: 36px;

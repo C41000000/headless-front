@@ -64,20 +64,24 @@
         <ng-container matColumnDef="slug">
           <th mat-header-cell *matHeaderCellDef class="col-slug">Slug</th>
           <td mat-cell *matCellDef="let category" class="col-slug">
-            <span class="mono">{{ category.slug }}</span>
+            <span class="slug-text mono">{{ category.slug }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="products_count">
           <th mat-header-cell *matHeaderCellDef class="col-count">Produtos</th>
           <td mat-cell *matCellDef="let category" class="col-count">
-            <span class="badge-count">{{ category.products_count ?? 0 }}</span>
+            <span class="count-value mono" [class.count-zero]="!category.products_count">
+              {{ category.products_count ?? 0 }}
+            </span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="order">
           <th mat-header-cell *matHeaderCellDef class="col-order">Ordem</th>
-          <td mat-cell *matCellDef="let category" class="col-order mono">{{ category.order }}</td>
+          <td mat-cell *matCellDef="let category" class="col-order">
+            <span class="order-value mono">{{ category.order }}</span>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="is_active">
