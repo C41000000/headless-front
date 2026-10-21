@@ -38,12 +38,15 @@ export const apiErrorInterceptor: HttpInterceptorFn = (req, next) => {
         const retryAfterHeader = error.headers.get('Retry-After');
         const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : null;
 
-        let rawMessage = error.error?.message || error.message || 'Erro inesperado na comunicação com o servidor.';
+        let rawMessage =
+          error.error?.message || error.message || 'Erro inesperado na comunicação com o servidor.';
         let translatedErrors: Record<string, string[]> | undefined = undefined;
 
         if (error.error?.errors && typeof error.error.errors === 'object') {
           translatedErrors = {};
-          for (const [key, messages] of Object.entries(error.error.errors as Record<string, string[]>)) {
+          for (const [key, messages] of Object.entries(
+            error.error.errors as Record<string, string[]>,
+          )) {
             translatedErrors[key] = Array.isArray(messages)
               ? messages.map((m) => translateErrorMessage(m))
               : [translateErrorMessage(String(messages))];

@@ -1,0 +1,274 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-left">
+      <a
+        mat-icon-button
+        routerLink="/painel/produtos"
+        class="back-btn"
+        matTooltip="Voltar para a lista"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <div>
+        <h1 class="page-title">{{ isEdit ? 'Editar Produto' : 'Novo Produto' }}</h1>
+        <p class="page-subtitle">
+          {{
+            isEdit
+              ? 'Atualize as informações, preços ou estoque'
+              : 'Cadastre um novo item na vitrine da loja'
+          }}
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      @if (canDelete()) {
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          (click)="onDelete()"
+          [disabled]="isDeleting() || isSaving()"
+        >
+          <mat-icon>delete_outline</mat-icon>
+          <span>Excluir</span>
+        </button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="isSaving() || isDeleting() || !canSave()"
+      >
+        @if (isSaving()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        }
+        <span>{{ isEdit ? 'Salvar Produto' : 'Cadastrar Produto' }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-layout">
+      <div class="form-main">
+        <!-- Informações Básicas -->
+        <mat-card appearance="outlined" class="section-card">
+          <mat-card-header>
+            <mat-card-title>Informações Principais</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-body">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nome do produto</mat-label>
+              <input
+                matInput
+                formControlName="name"
+                placeholder="Ex.: Tênis de Corrida Ultraleve"
+                required
+                maxlength="255"
+              />
+              @if (form.controls.name.hasError('required')) {
+                <mat-error>O nome do produto é obrigatório.</mat-error>
+              }
+              @if (validationErrors()['name']) {
+                <mat-error>{{ validationErrors()['name'][0] }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Categoria</mat-label>
+                <mat-select formControlName="category_uuid">
+                  <mat-option [value]="null">Sem categoria</mat-option>
+                  @for (cat of categories(); track cat.uuid) {
+                    <mat-option [value]="cat.uuid">{{ cat.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (validationErrors()['category_id']) {
+                  <mat-error>{{ validationErrors()['category_id'][0] }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Código SKU / Referência</mat-label>
+                <input
+                  matInput
+                  formControlName="sku"
+                  placeholder="Ex.: TEN-001-AZ"
+                  maxlength="100"
+                />
+                @if (validationErrors()['sku']) {
+                  <mat-error>{{ validationErrors()['sku'][0] }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Slug (URL amigável)</mat-label>
+              <input
+                matInput
+                formControlName="slug"
+                placeholder="Gerado automaticamente a partir do nome"
+                maxlength="255"
+              />
+              @if (validationErrors()['slug']) {
+                <mat-error>{{ validationErrors()['slug'][0] }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descrição detalhada</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                rows="4"
+                placeholder="Detalhes, especificações e características do produto..."
+                maxlength="5000"
+              ></textarea>
+              @if (validationErrors()['description']) {
+                <mat-error>{{ validationErrors()['description'][0] }}</mat-error>
+              }
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Preço e Estoque -->
+        <mat-card appearance="outlined" class="section-card">
+          <mat-card-header>
+            <mat-card-title>Preço e Estoque</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-body">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>Preço normal (R$)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  formControlName="price"
+                  required
+                />
+                @if (form.controls.price.hasError('required')) {
+                  <mat-error>O preço é obrigatório.</mat-error>
+                }
+                @if (validationErrors()['price']) {
+                  <mat-error>{{ validationErrors()['price'][0] }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>Preço promocional (R$)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  formControlName="promotional_price"
+                  placeholder="Opcional"
+                />
+                @if (form.hasError('promoGtePrice')) {
+                  <mat-error>O preço promocional deve ser menor que o original.</mat-error>
+                }
+                @if (validationErrors()['promotional_price']) {
+                  <mat-error>{{ validationErrors()['promotional_price'][0] }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>Estoque disponível</mat-label>
+                <input matInput type="number" min="0" formControlName="stock" required />
+                @if (form.controls.stock.hasError('required')) {
+                  <mat-error>O estoque é obrigatório.</mat-error>
+                }
+                @if (validationErrors()['stock']) {
+                  <mat-error>{{ validationErrors()['stock'][0] }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Barra lateral: Imagem e Visibilidade -->
+      <div class="form-sidebar">
+        <!-- Imagem -->
+        <mat-card appearance="outlined" class="section-card">
+          <mat-card-header>
+            <mat-card-title>Foto do Produto</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-body">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>URL da Imagem</mat-label>
+              <input
+                matInput
+                formControlName="image_url"
+                placeholder="https://..."
+                (input)="onImageUrlInput()"
+                maxlength="2048"
+              />
+              @if (form.controls.image_url.hasError('pattern')) {
+                <mat-error>Informe uma URL válida (http/https).</mat-error>
+              }
+              @if (validationErrors()['image_url']) {
+                <mat-error>{{ validationErrors()['image_url'][0] }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="image-preview-container">
+              @if (form.controls.image_url.value && !previewBroken()) {
+                <img
+                  [src]="form.controls.image_url.value"
+                  alt="Prévia do produto"
+                  class="preview-image"
+                  (error)="onPreviewError()"
+                />
+              } @else {
+                <div class="preview-empty">
+                  <mat-icon class="preview-icon">photo_camera</mat-icon>
+                  <span>Nenhuma imagem carregada</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Visibilidade e Destaque -->
+        <mat-card appearance="outlined" class="section-card">
+          <mat-card-header>
+            <mat-card-title>Visibilidade na Loja</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-body switches-card">
+            <div class="switch-row">
+              <div class="switch-label">
+                <span class="switch-title">Produto ativo</span>
+                <span class="switch-desc">Fica visível para compra pelos clientes</span>
+              </div>
+              <mat-slide-toggle
+                class="app-switch"
+                hideIcon
+                formControlName="is_active"
+              ></mat-slide-toggle>
+            </div>
+
+            <div class="switch-row">
+              <div class="switch-label">
+                <span class="switch-title">Em destaque</span>
+                <span class="switch-desc">Aparece na vitrine e banners promocionais</span>
+              </div>
+              <mat-slide-toggle
+                class="app-switch"
+                hideIcon
+                formControlName="is_featured"
+              ></mat-slide-toggle>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </form>
+  }
+</div>

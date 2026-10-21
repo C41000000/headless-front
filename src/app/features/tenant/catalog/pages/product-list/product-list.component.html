@@ -1,0 +1,230 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        Produtos
+        @if (!isLoading()) {
+          <span class="count-pill">{{ totalItems() }}</span>
+        }
+      </h1>
+      <p class="page-subtitle">Catálogo de itens comercializados na loja virtual do tenant</p>
+    </div>
+
+    @if (canCreate()) {
+      <a mat-flat-button color="primary" routerLink="/painel/produtos/novo" class="create-btn">
+        <mat-icon>add</mat-icon>
+        <span>Novo Produto</span>
+      </a>
+    }
+  </div>
+
+  <mat-card class="table-card" appearance="outlined">
+    <div class="filters-toolbar">
+      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-icon matPrefix class="search-icon">search</mat-icon>
+        <input
+          matInput
+          type="text"
+          placeholder="Buscar por nome, SKU ou descrição..."
+          [value]="search()"
+          (input)="onSearch($event)"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Categoria</mat-label>
+        <mat-select
+          [value]="categoryFilter()"
+          (valueChange)="categoryFilter.set($event); onFilterChange()"
+        >
+          <mat-option [value]="null">Todas</mat-option>
+          @for (cat of categories(); track cat.uuid) {
+            <mat-option [value]="cat.uuid">{{ cat.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Situação</mat-label>
+        <mat-select
+          [value]="statusFilter()"
+          (valueChange)="statusFilter.set($event); onFilterChange()"
+        >
+          <mat-option value="all">Todas</mat-option>
+          <mat-option value="active">Ativos</mat-option>
+          <mat-option value="inactive">Inativos</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+        <mat-label>Destaque</mat-label>
+        <mat-select
+          [value]="featuredFilter()"
+          (valueChange)="featuredFilter.set($event); onFilterChange()"
+        >
+          <mat-option value="all">Todos</mat-option>
+          <mat-option value="featured">Em destaque</mat-option>
+          <mat-option value="standard">Padrão</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="products()" class="mat-elevation-z0 data-table">
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef class="col-image">Imagem</th>
+          <td mat-cell *matCellDef="let product" class="col-image">
+            @if (product.image_url) {
+              <img [src]="product.image_url" alt="" class="product-thumb" loading="lazy" />
+            } @else {
+              <div class="thumb-placeholder">
+                <mat-icon>inventory_2</mat-icon>
+              </div>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef class="col-name">Produto</th>
+          <td mat-cell *matCellDef="let product" class="col-name">
+            <div class="product-info">
+              <a [routerLink]="['/painel/produtos', product.uuid, 'editar']" class="product-title">
+                {{ product.name }}
+              </a>
+              @if (product.sku) {
+                <span class="product-sku">SKU: {{ product.sku }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef class="col-category">Categoria</th>
+          <td mat-cell *matCellDef="let product" class="col-category">
+            @if (product.category) {
+              <span class="category-badge">{{ product.category.name }}</span>
+            } @else {
+              <span class="text-muted">Sem categoria</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef class="col-price">Preço</th>
+          <td mat-cell *matCellDef="let product" class="col-price">
+            <div class="price-container">
+              @if (product.promotional_price !== null) {
+                <span class="promo-price">{{ product.promotional_price | currency: 'BRL' }}</span>
+                <span class="old-price">{{ product.price | currency: 'BRL' }}</span>
+              } @else {
+                <span class="regular-price">{{ product.price | currency: 'BRL' }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="stock">
+          <th mat-header-cell *matHeaderCellDef class="col-stock">Estoque</th>
+          <td mat-cell *matCellDef="let product" class="col-stock">
+            <span
+              class="stock-pill"
+              [class.stock-out]="product.stock === 0"
+              [class.stock-low]="product.stock > 0 && product.stock <= 5"
+            >
+              {{ product.stock }} un
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="is_featured">
+          <th mat-header-cell *matHeaderCellDef class="col-featured">Destaque</th>
+          <td mat-cell *matCellDef="let product" class="col-featured">
+            @if (product.is_featured) {
+              <mat-icon class="featured-icon" matTooltip="Produto em destaque">star</mat-icon>
+            } @else {
+              <span class="text-muted">–</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="is_active">
+          <th mat-header-cell *matHeaderCellDef class="col-active">Ativo</th>
+          <td mat-cell *matCellDef="let product" class="col-active">
+            <mat-slide-toggle
+              class="app-switch"
+              hideIcon
+              [checked]="product.is_active"
+              [disabled]="!canUpdate() || busyUuid() === product.uuid"
+              (change)="onToggleActive(product, $event)"
+              [attr.aria-label]="(product.is_active ? 'Desativar ' : 'Ativar ') + product.name"
+            ></mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">Ações</th>
+          <td mat-cell *matCellDef="let product" class="col-actions">
+            <div class="actions-group">
+              <a
+                mat-icon-button
+                [routerLink]="['/painel/produtos', product.uuid, 'editar']"
+                [matTooltip]="canUpdate() ? 'Editar produto' : 'Ver produto'"
+                class="action-icon-btn edit-btn"
+              >
+                <mat-icon>{{ canUpdate() ? 'edit' : 'visibility' }}</mat-icon>
+              </a>
+              @if (canDelete()) {
+                <button
+                  mat-icon-button
+                  [disabled]="busyUuid() === product.uuid"
+                  (click)="onDelete(product)"
+                  matTooltip="Excluir produto"
+                  class="action-icon-btn delete-btn"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-table" [attr.colspan]="displayedColumns.length">
+            @if (!isLoading()) {
+              <div class="empty-state">
+                <mat-icon class="empty-icon">inventory_2</mat-icon>
+                @if (hasFilters()) {
+                  <p>Nenhum produto encontrado com os filtros aplicados.</p>
+                  <button mat-button (click)="clearFilters()">Limpar filtros</button>
+                } @else {
+                  <p>Nenhum produto cadastrado no catálogo.</p>
+                  @if (canCreate()) {
+                    <a mat-stroked-button routerLink="/painel/produtos/novo">
+                      Cadastrar primeiro produto
+                    </a>
+                  }
+                }
+              </div>
+            }
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[10, 15, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    ></mat-paginator>
+  </mat-card>
+</div>

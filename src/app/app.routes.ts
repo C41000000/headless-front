@@ -142,6 +142,38 @@ export const routes: Routes = [
         '/painel',
       ),
       {
+        path: 'categorias',
+        canActivate: [permissionGuard('categories.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/catalog/pages/category-list/category-list.component').then(
+            (m) => m.CategoryListComponent,
+          ),
+      },
+      {
+        path: 'produtos',
+        canActivate: [permissionGuard('products.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/catalog/pages/product-list/product-list.component').then(
+            (m) => m.ProductListComponent,
+          ),
+      },
+      {
+        path: 'produtos/novo',
+        canActivate: [permissionGuard('products.create', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/catalog/pages/product-form/product-form.component').then(
+            (m) => m.ProductFormComponent,
+          ),
+      },
+      {
+        path: 'produtos/:uuid/editar',
+        canActivate: [permissionGuard('products.view', '/painel')],
+        loadComponent: () =>
+          import('./features/tenant/catalog/pages/product-form/product-form.component').then(
+            (m) => m.ProductFormComponent,
+          ),
+      },
+      {
         path: 'banners',
         canActivate: [permissionGuard('banners.view', '/painel')],
         loadComponent: () =>

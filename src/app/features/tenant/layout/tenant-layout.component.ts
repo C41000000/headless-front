@@ -17,6 +17,20 @@ const NAV_ITEMS: readonly ShellNavItem[] = [
     permission: 'users.view',
   },
   {
+    label: 'Categorias',
+    icon: 'category',
+    route: '/painel/categorias',
+    shortcut: 'C',
+    permission: 'categories.view',
+  },
+  {
+    label: 'Produtos',
+    icon: 'inventory_2',
+    route: '/painel/produtos',
+    shortcut: 'P',
+    permission: 'products.view',
+  },
+  {
     label: 'Banners',
     icon: 'view_carousel',
     route: '/painel/banners',

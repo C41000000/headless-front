@@ -24,7 +24,9 @@
 
           @if (loginForm.controls.email.touched && loginForm.controls.email.errors?.['required']) {
             <mat-error>O e-mail é obrigatório.</mat-error>
-          } @else if (loginForm.controls.email.touched && loginForm.controls.email.errors?.['email']) {
+          } @else if (
+            loginForm.controls.email.touched && loginForm.controls.email.errors?.['email']
+          ) {
             <mat-error>Insira um e-mail válido.</mat-error>
           }
           @if (validationErrors()['email']) {
@@ -53,7 +55,9 @@
             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if (loginForm.controls.password.touched && loginForm.controls.password.errors?.['required']) {
+          @if (
+            loginForm.controls.password.touched && loginForm.controls.password.errors?.['required']
+          ) {
             <mat-error>A senha é obrigatória.</mat-error>
           }
           @if (validationErrors()['password']) {

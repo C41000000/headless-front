@@ -5,3 +5,5 @@ export * from './tenant.model';
 export * from './visual-identity.model';
 export * from './banner.model';
 export * from './user.model';
+export * from './category.model';
+export * from './product.model';
