@@ -6,8 +6,8 @@ import { TenantContextService } from '@core/tenant';
 import { UsersService } from '@shared/user-management';
 import { bannerStatus } from '../../../banners/banner-status';
 import { BannersService } from '../../../banners/services/banners.service';
-import { CategoriesService } from '../../catalog/services/categories.service';
-import { ProductsService } from '../../catalog/services/products.service';
+import { CategoriesService } from '../../../catalog/services/categories.service';
+import { ProductsService } from '../../../catalog/services/products.service';
 
 interface Shortcut {
   label: string;

@@ -107,8 +107,10 @@ describe('ProductFormComponent', () => {
     component.form.controls.promotional_price.setValue(120);
 
     expect(component.form.hasError('promoGtePrice')).toBe(true);
+    expect(component.form.controls.promotional_price.hasError('promoGtePrice')).toBe(true);
 
     component.form.controls.promotional_price.setValue(80);
     expect(component.form.hasError('promoGtePrice')).toBe(false);
+    expect(component.form.controls.promotional_price.hasError('promoGtePrice')).toBe(false);
   });
 });

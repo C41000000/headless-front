@@ -25,21 +25,25 @@ import { ProductsService } from '../../services/products.service';
 
 const URL_PATTERN = /^https?:\/\/\S+$/i;
 
-function priceValidator(control: AbstractControl): ValidationErrors | null {
-  const price = control.get('price')?.value;
-  const promo = control.get('promotional_price')?.value;
+function priceValidator(group: AbstractControl): ValidationErrors | null {
+  const price = group.get('price')?.value;
+  const promoControl = group.get('promotional_price');
+  const promo = promoControl?.value;
 
-  if (
-    promo !== null &&
-    promo !== undefined &&
-    promo !== '' &&
-    price !== null &&
-    price !== undefined
-  ) {
-    if (Number(promo) >= Number(price)) {
-      return { promoGtePrice: true };
-    }
+  const hasPromo = promo !== null && promo !== undefined && promo !== '';
+  const hasPrice = price !== null && price !== undefined && price !== '';
+
+  if (hasPromo && hasPrice && Number(promo) >= Number(price)) {
+    promoControl?.setErrors({ ...(promoControl.errors || {}), promoGtePrice: true });
+    return { promoGtePrice: true };
   }
+
+  if (promoControl?.hasError('promoGtePrice')) {
+    const errors = { ...promoControl.errors };
+    delete errors['promoGtePrice'];
+    promoControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
+  }
+
   return null;
 }
 
@@ -136,6 +140,14 @@ export class ProductFormComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      if (
+        this.form.hasError('promoGtePrice') ||
+        this.form.controls.promotional_price.hasError('promoGtePrice')
+      ) {
+        this.toastService.warning('O preço promocional deve ser menor que o preço original.');
+      } else {
+        this.toastService.warning('Verifique os campos obrigatórios do formulário.');
+      }
       return;
     }
 
