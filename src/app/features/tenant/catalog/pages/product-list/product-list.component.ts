@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -17,6 +17,7 @@ import { AUTH_SESSION } from '@core/auth/auth-session';
 import { ApiErrorResponse, CategoryDto, ProductDto } from '@core/models';
 import { ToastService } from '@core/toast';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog';
+import { MatPaginatorIntlPtBr } from '@shared/paginator/mat-paginator-intl-ptbr';
 import { CategoriesService } from '../../services/categories.service';
 import { ProductsService } from '../../services/products.service';
 
@@ -41,6 +42,7 @@ type FeaturedFilter = 'all' | 'featured' | 'standard';
     MatSelectModule,
     MatSlideToggleModule,
   ],
+  providers: [{ provide: MatPaginatorIntl, useClass: MatPaginatorIntlPtBr }],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.scss',
 })

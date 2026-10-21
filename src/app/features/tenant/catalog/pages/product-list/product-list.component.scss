@@ -207,29 +207,67 @@
   }
 
   .col-stock {
-    width: 100px;
+    min-width: 120px;
+    white-space: nowrap;
   }
 
-  .stock-pill {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
+  .stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
     font-family: var(--app-font-mono);
-    color: var(--app-text-secondary);
+    white-space: nowrap;
     background-color: var(--app-surface-muted);
     border: 1px solid var(--app-border);
+    color: var(--app-text-strong);
+
+    .stock-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background-color: var(--app-success);
+    }
+
+    .stock-qty {
+      font-weight: 600;
+    }
+
+    .stock-unit {
+      font-size: 0.72rem;
+      color: var(--app-text-muted);
+      font-weight: 500;
+    }
 
     &.stock-low {
       color: #d97706;
       border-color: rgba(217, 119, 6, 0.3);
       background-color: rgba(217, 119, 6, 0.08);
+
+      .stock-dot {
+        background-color: #f59e0b;
+      }
+
+      .stock-unit {
+        color: #d97706;
+      }
     }
 
     &.stock-out {
       color: var(--app-danger);
       border-color: color-mix(in srgb, var(--app-danger) 30%, transparent);
       background-color: color-mix(in srgb, var(--app-danger) 8%, transparent);
+
+      .stock-dot {
+        background-color: var(--app-danger);
+      }
+
+      .stock-unit {
+        color: var(--app-danger);
+      }
     }
   }
 
