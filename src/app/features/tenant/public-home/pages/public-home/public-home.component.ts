@@ -1,16 +1,19 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { TokenService } from '@core/auth/token.service';
+import { CartService } from '@core/cart';
 import { BannerDto, CategoryDto, ProductDto } from '@core/models';
 import { TenantContextService, VisualIdentityService } from '@core/tenant';
 import { ThemeService } from '@core/theme';
 import { BrandMarkComponent } from '@shared/components/brand-mark';
+import { CartDrawerComponent } from '@shared/components/cart-drawer';
 import { BannersService } from '../../../banners/services/banners.service';
 import { CategoriesService } from '../../../catalog/services/categories.service';
 import { ProductsService } from '../../../catalog/services/products.service';
@@ -26,9 +29,11 @@ const CAROUSEL_INTERVAL_MS = 6000;
     FormsModule,
     MatButtonModule,
     MatIconModule,
+    MatBadgeModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     BrandMarkComponent,
+    CartDrawerComponent,
   ],
   templateUrl: './public-home.component.html',
   styleUrl: './public-home.component.scss',
@@ -38,6 +43,7 @@ export class PublicHomeComponent implements OnInit, OnDestroy {
   protected readonly visualIdentityService = inject(VisualIdentityService);
   protected readonly tokenService = inject(TokenService);
   protected readonly themeService = inject(ThemeService);
+  public readonly cartService = inject(CartService);
   private readonly bannersService = inject(BannersService);
   private readonly categoriesService = inject(CategoriesService);
   private readonly productsService = inject(ProductsService);
@@ -203,6 +209,10 @@ export class PublicHomeComponent implements OnInit, OnDestroy {
     }
     const discount = ((product.price - product.promotional_price) / product.price) * 100;
     return Math.round(discount);
+  }
+
+  public addToCart(product: ProductDto): void {
+    this.cartService.addItem(product);
   }
 
   // Carrossel de Banners

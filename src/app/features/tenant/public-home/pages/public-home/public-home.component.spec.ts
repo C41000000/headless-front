@@ -202,4 +202,10 @@ describe('PublicHomeComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('empresa.localhost');
   });
+
+  it('should add product to cart', () => {
+    component.addToCart(mockProduct);
+    expect(component.cartService.items().length).toBe(1);
+    expect(component.cartService.items()[0].name).toBe('Smartphone Pro');
+  });
 });

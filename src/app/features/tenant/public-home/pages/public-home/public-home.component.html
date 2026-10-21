@@ -41,6 +41,22 @@
       </form>
 
       <div class="nav-actions">
+        <!-- Botão do Carrinho -->
+        <button
+          type="button"
+          mat-icon-button
+          class="cart-toggle-btn"
+          (click)="cartService.toggle()"
+          [matBadge]="cartService.totalItems()"
+          [matBadgeHidden]="cartService.totalItems() === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+          aria-label="Abrir carrinho de compras"
+          matTooltip="Meu Carrinho"
+        >
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+
         <button
           type="button"
           mat-icon-button
@@ -309,6 +325,7 @@
                     color="primary"
                     class="buy-btn"
                     [disabled]="product.stock === 0"
+                    (click)="addToCart(product)"
                   >
                     <mat-icon>shopping_bag</mat-icon>
                     <span>Comprar</span>
@@ -419,4 +436,7 @@
       </div>
     </div>
   </footer>
+
+  <!-- Drawer do Carrinho -->
+  <app-cart-drawer></app-cart-drawer>
 </div>

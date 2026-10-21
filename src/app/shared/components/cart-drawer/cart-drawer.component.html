@@ -1,0 +1,155 @@
+@if (cartService.isOpen()) {
+  <div class="drawer-backdrop" (click)="cartService.close()" role="presentation"></div>
+
+  <aside class="cart-drawer" role="dialog" aria-label="Carrinho de Compras" aria-modal="true">
+    <!-- Header do Drawer -->
+    <header class="drawer-header">
+      <div class="header-title-box">
+        <mat-icon class="header-icon">shopping_bag</mat-icon>
+        <h2 class="header-title">Meu Carrinho</h2>
+        <span class="items-count-pill">{{ cartService.totalItems() }}</span>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="close-btn"
+        (click)="cartService.close()"
+        aria-label="Fechar carrinho"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <!-- Conteúdo do Carrinho -->
+    <div class="drawer-body">
+      @if (cartService.isEmpty()) {
+        <div class="empty-cart-state">
+          <div class="empty-icon-wrapper">
+            <mat-icon class="empty-icon">remove_shopping_cart</mat-icon>
+          </div>
+          <h3 class="empty-title">Seu carrinho está vazio</h3>
+          <p class="empty-desc">
+            Nenhum produto adicionado ainda. Explore nossas categorias e encontre as melhores
+            ofertas!
+          </p>
+          <button
+            mat-flat-button
+            color="primary"
+            class="shop-now-btn"
+            (click)="cartService.close()"
+          >
+            <mat-icon>storefront</mat-icon>
+            <span>Ver Produtos</span>
+          </button>
+        </div>
+      } @else {
+        <div class="cart-items-list">
+          @for (item of cartService.items(); track item.product_uuid) {
+            <article class="cart-item">
+              <div class="item-thumb-wrapper">
+                @if (item.image_url) {
+                  <img [src]="item.image_url" [alt]="item.name" class="item-thumb" />
+                } @else {
+                  <div class="item-thumb-placeholder">
+                    <mat-icon>inventory_2</mat-icon>
+                  </div>
+                }
+              </div>
+
+              <div class="item-content">
+                <div class="item-header">
+                  <h4 class="item-name" [title]="item.name">{{ item.name }}</h4>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="remove-btn"
+                    (click)="cartService.removeItem(item.product_uuid)"
+                    matTooltip="Remover do carrinho"
+                    aria-label="Remover item"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+
+                <div class="item-price-unit">
+                  @if (
+                    item.promotional_price !== null && item.promotional_price < item.original_price
+                  ) {
+                    <span class="price-promo">{{ item.price | currency: 'BRL' }}</span>
+                    <span class="price-old">{{ item.original_price | currency: 'BRL' }}</span>
+                  } @else {
+                    <span class="price-regular">{{ item.price | currency: 'BRL' }}</span>
+                  }
+                </div>
+
+                <div class="item-footer">
+                  <div class="qty-control">
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="cartService.updateQuantity(item.product_uuid, item.quantity - 1)"
+                      aria-label="Diminuir quantidade"
+                    >
+                      <mat-icon>{{ item.quantity === 1 ? 'delete_outline' : 'remove' }}</mat-icon>
+                    </button>
+                    <span class="qty-value mono">{{ item.quantity }}</span>
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="cartService.updateQuantity(item.product_uuid, item.quantity + 1)"
+                      [disabled]="item.quantity >= item.stock"
+                      aria-label="Aumentar quantidade"
+                    >
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="item-subtotal">
+                    <span class="subtotal-label">Subtotal:</span>
+                    <span class="subtotal-value mono">{{
+                      item.price * item.quantity | currency: 'BRL'
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer com Totais e Ações -->
+    @if (!cartService.isEmpty()) {
+      <footer class="drawer-footer">
+        <div class="total-row">
+          <span class="total-label">Subtotal</span>
+          <span class="total-value mono">{{ cartService.subtotal() | currency: 'BRL' }}</span>
+        </div>
+
+        <p class="shipping-note">
+          <mat-icon class="note-icon">local_shipping</mat-icon>
+          <span>Frete e endereço calculados no checkout</span>
+        </p>
+
+        <div class="drawer-actions">
+          <button mat-flat-button color="primary" class="checkout-btn" (click)="onCheckout()">
+            <mat-icon>lock</mat-icon>
+            <span>Finalizar Compra</span>
+          </button>
+
+          <div class="secondary-actions">
+            <button mat-button type="button" class="continue-btn" (click)="cartService.close()">
+              Continuar Comprando
+            </button>
+
+            <button mat-button type="button" class="clear-cart-btn" (click)="cartService.clear()">
+              <mat-icon>remove_shopping_cart</mat-icon>
+              <span>Esvaziar</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    }
+  </aside>
+}
