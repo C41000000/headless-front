@@ -4,8 +4,20 @@
     <h1 class="page-title">Painel de {{ tenantContext.tenantDomain() }}</h1>
   </header>
 
-  @if (canSeeBanners() || canSeeUsers()) {
+  @if (canSeeProducts() || canSeeCategories() || canSeeBanners() || canSeeUsers()) {
     <section class="metrics" aria-label="Resumo">
+      @if (canSeeProducts()) {
+        <div class="metric">
+          <span class="metric-value">{{ productsTotal() ?? '–' }}</span>
+          <span class="metric-label">produtos</span>
+        </div>
+      }
+      @if (canSeeCategories()) {
+        <div class="metric">
+          <span class="metric-value">{{ categoriesTotal() ?? '–' }}</span>
+          <span class="metric-label">categorias</span>
+        </div>
+      }
       @if (canSeeBanners()) {
         <div class="metric">
           <span class="metric-value">{{ bannersLive() ?? '–' }}</span>

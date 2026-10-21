@@ -6,6 +6,8 @@ import { TenantContextService } from '@core/tenant';
 import { UsersService } from '@shared/user-management';
 import { bannerStatus } from '../../../banners/banner-status';
 import { BannersService } from '../../../banners/services/banners.service';
+import { CategoriesService } from '../../catalog/services/categories.service';
+import { ProductsService } from '../../catalog/services/products.service';
 
 interface Shortcut {
   label: string;
@@ -16,6 +18,20 @@ interface Shortcut {
 }
 
 const SHORTCUTS: readonly Shortcut[] = [
+  {
+    label: 'Produtos',
+    description: 'Itens, preços, estoque e fotos do catálogo.',
+    icon: 'inventory_2',
+    route: '/painel/produtos',
+    permission: 'products.view',
+  },
+  {
+    label: 'Categorias',
+    description: 'Departamentos para organizar os produtos.',
+    icon: 'category',
+    route: '/painel/categorias',
+    permission: 'categories.view',
+  },
   {
     label: 'Banners',
     description: 'Crie, agende e ordene os banners do site.',
@@ -50,11 +66,15 @@ export class TenantHomeComponent implements OnInit {
   private readonly session = inject(AUTH_SESSION);
   private readonly usersService = inject(UsersService);
   private readonly bannersService = inject(BannersService);
+  private readonly productsService = inject(ProductsService);
+  private readonly categoriesService = inject(CategoriesService);
   protected readonly tenantContext = inject(TenantContextService);
 
   public readonly usersTotal = signal<number | null>(null);
   public readonly bannersTotal = signal<number | null>(null);
   public readonly bannersLive = signal<number | null>(null);
+  public readonly productsTotal = signal<number | null>(null);
+  public readonly categoriesTotal = signal<number | null>(null);
 
   public readonly firstName = computed(
     () => this.session.currentUser()?.name.trim().split(/\s+/)[0] ?? '',
@@ -68,6 +88,8 @@ export class TenantHomeComponent implements OnInit {
   );
   public readonly canSeeUsers = computed(() => this.session.can('users.view'));
   public readonly canSeeBanners = computed(() => this.session.can('banners.view'));
+  public readonly canSeeProducts = computed(() => this.session.can('products.view'));
+  public readonly canSeeCategories = computed(() => this.session.can('categories.view'));
 
   public ngOnInit(): void {
     // As métricas dependem das permissions, que podem chegar depois (via /auth/me)
@@ -78,6 +100,18 @@ export class TenantHomeComponent implements OnInit {
   }
 
   private loadMetrics(): void {
+    if (this.canSeeProducts()) {
+      this.productsService.getProducts().subscribe({
+        next: (response) => this.productsTotal.set(response.meta.total),
+        error: () => undefined,
+      });
+    }
+    if (this.canSeeCategories()) {
+      this.categoriesService.getCategories().subscribe({
+        next: (categories) => this.categoriesTotal.set(categories.length),
+        error: () => undefined,
+      });
+    }
     if (this.canSeeUsers()) {
       this.usersService.getUsers(1).subscribe({
         next: (response) => this.usersTotal.set(response.meta.total),
