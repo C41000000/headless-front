@@ -1,5 +1,5 @@
 <div class="public-layout">
-  <!-- Topbar Pública -->
+  <!-- Topbar Pública com Busca E-commerce -->
   <header class="public-nav">
     <div class="nav-container">
       <div class="nav-brand">
@@ -10,6 +10,35 @@
         }
         <span class="brand-name">{{ tenantContext.tenantDomain() }}</span>
       </div>
+
+      <!-- Barra de Busca E-commerce -->
+      <form class="ecommerce-search-form" (ngSubmit)="onSearchSubmit()">
+        <div class="search-input-wrapper">
+          <mat-icon class="search-lead-icon">search</mat-icon>
+          <input
+            type="text"
+            class="ecommerce-search-input"
+            name="searchQuery"
+            placeholder="O que você está procurando hoje?"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            autocomplete="off"
+          />
+          @if (searchQuery().length > 0) {
+            <button
+              type="button"
+              class="search-clear-btn"
+              (click)="clearSearch()"
+              aria-label="Limpar busca"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <button type="submit" class="search-submit-btn" aria-label="Buscar produtos">
+            <span>Buscar</span>
+          </button>
+        </div>
+      </form>
 
       <div class="nav-actions">
         <button
@@ -27,7 +56,7 @@
         @if (tokenService.isTenantAuthenticated()) {
           <a mat-flat-button color="primary" routerLink="/painel" class="auth-btn">
             <mat-icon>dashboard</mat-icon>
-            <span>Ir para o Painel</span>
+            <span>Painel</span>
           </a>
         } @else {
           <a mat-stroked-button routerLink="/auth/login" class="auth-btn">
@@ -37,115 +66,302 @@
         }
       </div>
     </div>
+
+    <!-- Barra de Categorias / Departamentos -->
+    <nav class="category-bar" aria-label="Categorias de produtos">
+      <div class="category-container">
+        <button
+          type="button"
+          class="category-pill"
+          [class.active]="selectedCategorySlug() === null"
+          (click)="selectCategory(null)"
+        >
+          <mat-icon class="cat-icon">apps</mat-icon>
+          <span>Todos os Produtos</span>
+        </button>
+
+        @for (category of categories(); track category.uuid) {
+          <button
+            type="button"
+            class="category-pill"
+            [class.active]="selectedCategorySlug() === category.slug"
+            (click)="selectCategory(category.slug)"
+          >
+            <span>{{ category.name }}</span>
+            @if (category.products_count !== undefined && category.products_count > 0) {
+              <span class="cat-count">{{ category.products_count }}</span>
+            }
+          </button>
+        }
+      </div>
+    </nav>
   </header>
 
   <main class="public-main">
-    <!-- Seção de Banners / Hero -->
-    <section class="hero-section" aria-label="Banners principais">
-      @if (isLoadingBanners()) {
-        <div class="carousel-loading">
-          <mat-spinner diameter="36"></mat-spinner>
-          <p>Carregando destaques...</p>
-        </div>
-      } @else if (banners().length > 0) {
-        <div class="carousel-container" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
-          <div class="carousel-track">
-            @for (banner of banners(); track banner.uuid; let i = $index) {
-              <div
-                class="carousel-slide"
-                [class.active]="i === currentSlide()"
-                [attr.aria-hidden]="i !== currentSlide()"
-              >
-                <div class="slide-media">
-                  <picture>
-                    @if (banner.mobile_image_url) {
-                      <source [srcset]="banner.mobile_image_url" media="(max-width: 640px)" />
-                    }
-                    <img
-                      [src]="banner.image_url"
-                      [alt]="banner.title || 'Destaque ' + (i + 1)"
-                      class="slide-img"
-                    />
-                  </picture>
-                  <div class="slide-overlay"></div>
-                </div>
-
-                @if (banner.title || banner.subtitle || banner.link_url) {
-                  <div class="slide-content">
-                    @if (banner.title) {
-                      <h2 class="slide-title">{{ banner.title }}</h2>
-                    }
-                    @if (banner.subtitle) {
-                      <p class="slide-subtitle">{{ banner.subtitle }}</p>
-                    }
-                    @if (banner.link_url) {
-                      <a
-                        mat-flat-button
-                        color="primary"
-                        [href]="banner.link_url"
-                        [target]="banner.target"
-                        rel="noopener noreferrer"
-                        class="slide-cta"
-                      >
-                        <span>Acessar</span>
-                        <mat-icon>arrow_forward</mat-icon>
-                      </a>
-                    }
+    <!-- Seção de Banners / Hero (quando não houver busca ativa) -->
+    @if (!activeSearch()) {
+      <section class="hero-section" aria-label="Banners principais">
+        @if (isLoadingBanners()) {
+          <div class="carousel-loading">
+            <mat-spinner diameter="36"></mat-spinner>
+            <p>Carregando destaques...</p>
+          </div>
+        } @else if (banners().length > 0) {
+          <div
+            class="carousel-container"
+            (mouseenter)="onMouseEnter()"
+            (mouseleave)="onMouseLeave()"
+          >
+            <div class="carousel-track">
+              @for (banner of banners(); track banner.uuid; let i = $index) {
+                <div
+                  class="carousel-slide"
+                  [class.active]="i === currentSlide()"
+                  [attr.aria-hidden]="i !== currentSlide()"
+                >
+                  <div class="slide-media">
+                    <picture>
+                      @if (banner.mobile_image_url) {
+                        <source media="(max-width: 640px)" [srcset]="banner.mobile_image_url" />
+                      }
+                      <img [src]="banner.image_url" [alt]="banner.title || 'Banner promocional'" />
+                    </picture>
                   </div>
+
+                  @if (banner.title || banner.subtitle || banner.link_url) {
+                    <div class="slide-overlay">
+                      <div class="slide-content">
+                        @if (banner.title) {
+                          <h2 class="slide-title">{{ banner.title }}</h2>
+                        }
+                        @if (banner.subtitle) {
+                          <p class="slide-subtitle">{{ banner.subtitle }}</p>
+                        }
+                        @if (banner.link_url) {
+                          <a
+                            mat-flat-button
+                            color="primary"
+                            [href]="banner.link_url"
+                            [target]="banner.target"
+                            rel="noopener noreferrer"
+                            class="slide-cta"
+                          >
+                            <span>Aproveitar oferta</span>
+                            <mat-icon>arrow_forward</mat-icon>
+                          </a>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (banners().length > 1) {
+              <button
+                type="button"
+                class="carousel-nav-btn prev-btn"
+                (click)="prevSlide()"
+                aria-label="Banner anterior"
+              >
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button
+                type="button"
+                class="carousel-nav-btn next-btn"
+                (click)="nextSlide()"
+                aria-label="Próximo banner"
+              >
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+
+              <div class="carousel-dots" role="tablist" aria-label="Indicadores dos slides">
+                @for (banner of banners(); track banner.uuid; let i = $index) {
+                  <button
+                    type="button"
+                    class="carousel-dot"
+                    [class.active]="i === currentSlide()"
+                    (click)="goToSlide(i)"
+                    [attr.aria-label]="'Ir para o slide ' + (i + 1)"
+                    role="tab"
+                    [attr.aria-selected]="i === currentSlide()"
+                  ></button>
                 }
               </div>
             }
           </div>
+        }
+      </section>
+    }
 
-          @if (banners().length > 1) {
-            <button
-              type="button"
-              class="carousel-nav-btn prev-btn"
-              (click)="prevSlide()"
-              aria-label="Slide anterior"
-            >
-              <mat-icon>chevron_left</mat-icon>
-            </button>
-            <button
-              type="button"
-              class="carousel-nav-btn next-btn"
-              (click)="nextSlide()"
-              aria-label="Próximo slide"
-            >
-              <mat-icon>chevron_right</mat-icon>
-            </button>
+    <!-- Seção de Catálogo de Produtos -->
+    <section class="catalog-section" aria-label="Vitrine de produtos">
+      <div class="catalog-header">
+        <div class="catalog-title-wrapper">
+          <h2 class="catalog-title">
+            @if (activeSearch()) {
+              Resultados para "{{ activeSearch() }}"
+            } @else if (selectedCategory(); as cat) {
+              {{ cat.name }}
+            } @else {
+              Vitrine de Produtos
+            }
+          </h2>
+          <span class="catalog-count">{{ totalProducts() }} produto(s) encontrado(s)</span>
+        </div>
 
-            <div class="carousel-dots" role="tablist" aria-label="Controle de slides">
-              @for (banner of banners(); track banner.uuid; let i = $index) {
-                <button
-                  type="button"
-                  class="carousel-dot"
-                  [class.active]="i === currentSlide()"
-                  (click)="goToSlide(i)"
-                  [attr.aria-label]="'Ir para o slide ' + (i + 1)"
-                  role="tab"
-                  [attr.aria-selected]="i === currentSlide()"
-                ></button>
-              }
-            </div>
+        <div class="catalog-filters">
+          <button
+            type="button"
+            class="filter-toggle-btn"
+            [class.active]="onlyFeatured()"
+            (click)="toggleOnlyFeatured()"
+          >
+            <mat-icon>{{ onlyFeatured() ? 'star' : 'star_border' }}</mat-icon>
+            <span>Destaques</span>
+          </button>
+
+          @if (hasFilters()) {
+            <button type="button" class="clear-filters-btn" (click)="clearAllFilters()">
+              <mat-icon>filter_alt_off</mat-icon>
+              <span>Limpar filtros</span>
+            </button>
           }
         </div>
-      } @else {
-        <!-- Fallback Hero quando não há banners cadastrados -->
-        <div class="fallback-hero">
-          <div class="hero-content">
-            <span class="hero-badge">Plataforma Ativa</span>
-            <h1 class="hero-title">Bem-vindo a {{ tenantContext.tenantDomain() }}</h1>
-            <p class="hero-description">
-              Ambiente moderno, veloz e integrado com arquitetura headless multi-tenant.
-            </p>
-            <div class="hero-actions">
-              <a mat-flat-button color="primary" routerLink="/auth/login" class="hero-cta">
-                <mat-icon>lock_open</mat-icon>
-                <span>Acessar Painel</span>
-              </a>
-            </div>
+      </div>
+
+      <!-- Loading Produtos -->
+      @if (isLoadingProducts()) {
+        <div class="catalog-loading">
+          <mat-spinner diameter="44"></mat-spinner>
+          <p>Buscando produtos...</p>
+        </div>
+      } @else if (products().length > 0) {
+        <!-- Grid de Produtos E-commerce -->
+        <div class="products-grid">
+          @for (product of products(); track product.uuid) {
+            <article class="product-card">
+              <div class="card-media">
+                @if (product.image_url) {
+                  <img
+                    [src]="product.image_url"
+                    [alt]="product.name"
+                    class="product-image"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="product-placeholder">
+                    <mat-icon>inventory_2</mat-icon>
+                  </div>
+                }
+
+                <!-- Badges sobre a foto -->
+                <div class="card-badges">
+                  @if (discountPercentage(product); as pct) {
+                    <span class="discount-badge">-{{ pct }}%</span>
+                  }
+                  @if (product.is_featured) {
+                    <span class="featured-badge" matTooltip="Produto em destaque">
+                      <mat-icon>star</mat-icon>
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <div class="card-body">
+                @if (product.category) {
+                  <span class="product-category-name">{{ product.category.name }}</span>
+                }
+                <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
+
+                @if (product.description) {
+                  <p class="product-desc">{{ product.description }}</p>
+                }
+
+                <div class="price-box">
+                  @if (product.promotional_price !== null) {
+                    <div class="promo-pricing">
+                      <span class="current-price">{{
+                        product.promotional_price | currency: 'BRL'
+                      }}</span>
+                      <span class="original-price">{{ product.price | currency: 'BRL' }}</span>
+                    </div>
+                  } @else {
+                    <span class="current-price">{{ product.price | currency: 'BRL' }}</span>
+                  }
+                </div>
+
+                <div class="card-footer">
+                  @if (product.stock > 0) {
+                    <span class="stock-status in-stock">
+                      <span class="status-dot"></span>
+                      Em estoque
+                    </span>
+                  } @else {
+                    <span class="stock-status out-of-stock">
+                      <span class="status-dot"></span>
+                      Esgotado
+                    </span>
+                  }
+
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    class="buy-btn"
+                    [disabled]="product.stock === 0"
+                  >
+                    <mat-icon>shopping_bag</mat-icon>
+                    <span>Comprar</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+
+        <!-- Paginação -->
+        @if (lastPage() > 1) {
+          <div class="pagination-bar">
+            <button
+              mat-stroked-button
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+            >
+              <mat-icon>chevron_left</mat-icon>
+              <span>Anterior</span>
+            </button>
+            <span class="page-indicator">Página {{ currentPage() }} de {{ lastPage() }}</span>
+            <button
+              mat-stroked-button
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === lastPage()"
+            >
+              <span>Próxima</span>
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
+        }
+      } @else {
+        <!-- Estado Vazio -->
+        <div class="empty-catalog">
+          <div class="empty-icon-wrap">
+            <mat-icon>search_off</mat-icon>
+          </div>
+          <h3>Nenhum produto encontrado</h3>
+          <p>
+            @if (activeSearch()) {
+              Não encontramos nenhum item correspondente a "{{ activeSearch() }}".
+            } @else if (selectedCategory(); as cat) {
+              Não há produtos cadastrados na categoria "{{ cat.name }}" no momento.
+            } @else {
+              A loja ainda não possui produtos ativos no catálogo.
+            }
+          </p>
+          @if (hasFilters()) {
+            <button mat-flat-button color="primary" (click)="clearAllFilters()">
+              Ver todos os produtos
+            </button>
+          }
         </div>
       }
     </section>
@@ -153,43 +369,38 @@
     <!-- Destaques Institucionais -->
     <section class="features-section" aria-label="Recursos">
       <div class="features-header">
-        <h2 class="section-title">Nossa Estrutura</h2>
-        <p class="section-subtitle">
-          Tudo o que você precisa em uma infraestrutura moderna e escalável
-        </p>
+        <h2 class="section-title">Por que comprar conosco</h2>
+        <p class="section-subtitle">Experiência completa, segura e ágil para você</p>
       </div>
 
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">
-            <mat-icon>shield</mat-icon>
+            <mat-icon>local_shipping</mat-icon>
           </div>
-          <h3 class="feature-title">Segurança & Isolamento</h3>
+          <h3 class="feature-title">Envio Rápido & Seguro</h3>
           <p class="feature-text">
-            Banco de dados e configurações totalmente isolados garantindo total privacidade e
-            integridade das informações.
+            Seus pedidos são separados e enviados com agilidade para você acompanhar cada etapa.
           </p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <mat-icon>palette</mat-icon>
+            <mat-icon>verified_user</mat-icon>
           </div>
-          <h3 class="feature-title">Identidade Visual Própria</h3>
+          <h3 class="feature-title">Pagamento Protegido</h3>
           <p class="feature-text">
-            Cores da marca, logotipo e personalizações visuais aplicadas em tempo real com suporte a
-            temas.
+            Transações criptografadas com total segurança e suporte a múltiplos meios de pagamento.
           </p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <mat-icon>speed</mat-icon>
+            <mat-icon>support_agent</mat-icon>
           </div>
-          <h3 class="feature-title">Alta Performance</h3>
+          <h3 class="feature-title">Atendimento Especializado</h3>
           <p class="feature-text">
-            API otimizada com cache inteligente, tempos de resposta ultrarrápidos e interface
-            reativa com Signals.
+            Nossa equipe está à disposição para tirar dúvidas e oferecer a melhor assistência.
           </p>
         </div>
       </div>
