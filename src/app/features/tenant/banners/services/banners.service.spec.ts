@@ -53,6 +53,17 @@ describe('BannersService', () => {
     httpMock.expectOne('/api/v1/admin/banners?placement=home&is_active=0').flush([]);
   });
 
+  it('should list public banners with placement filter', () => {
+    service.getPublicBanners('home').subscribe((banners) => {
+      expect(banners.length).toBe(1);
+      expect(banners[0].uuid).toBe('banner-1');
+    });
+
+    const req = httpMock.expectOne('/api/v1/banners?placement=home');
+    expect(req.request.method).toBe('GET');
+    req.flush([banner]);
+  });
+
   it('should create banner', () => {
     const payload = { image_url: 'https://cdn.example.com/hero.webp', placement: 'home' };
 

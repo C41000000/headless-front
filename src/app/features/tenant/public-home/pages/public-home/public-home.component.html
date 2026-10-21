@@ -1,0 +1,211 @@
+<div class="public-layout">
+  <!-- Topbar Pública -->
+  <header class="public-nav">
+    <div class="nav-container">
+      <div class="nav-brand">
+        @if (activeLogo(); as logoUrl) {
+          <img [src]="logoUrl" [alt]="tenantContext.tenantDomain()" class="brand-logo" />
+        } @else {
+          <app-brand-mark [size]="28"></app-brand-mark>
+        }
+        <span class="brand-name">{{ tenantContext.tenantDomain() }}</span>
+      </div>
+
+      <div class="nav-actions">
+        <button
+          type="button"
+          mat-icon-button
+          class="theme-toggle"
+          (click)="themeService.toggle()"
+          [attr.aria-label]="
+            themeService.isDark() ? 'Mudar para tema claro' : 'Mudar para tema escuro'
+          "
+        >
+          <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        @if (tokenService.isTenantAuthenticated()) {
+          <a mat-flat-button color="primary" routerLink="/painel" class="auth-btn">
+            <mat-icon>dashboard</mat-icon>
+            <span>Ir para o Painel</span>
+          </a>
+        } @else {
+          <a mat-stroked-button routerLink="/auth/login" class="auth-btn">
+            <mat-icon>login</mat-icon>
+            <span>Entrar</span>
+          </a>
+        }
+      </div>
+    </div>
+  </header>
+
+  <main class="public-main">
+    <!-- Seção de Banners / Hero -->
+    <section class="hero-section" aria-label="Banners principais">
+      @if (isLoadingBanners()) {
+        <div class="carousel-loading">
+          <mat-spinner diameter="36"></mat-spinner>
+          <p>Carregando destaques...</p>
+        </div>
+      } @else if (banners().length > 0) {
+        <div class="carousel-container" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+          <div class="carousel-track">
+            @for (banner of banners(); track banner.uuid; let i = $index) {
+              <div
+                class="carousel-slide"
+                [class.active]="i === currentSlide()"
+                [attr.aria-hidden]="i !== currentSlide()"
+              >
+                <div class="slide-media">
+                  <picture>
+                    @if (banner.mobile_image_url) {
+                      <source [srcset]="banner.mobile_image_url" media="(max-width: 640px)" />
+                    }
+                    <img
+                      [src]="banner.image_url"
+                      [alt]="banner.title || 'Destaque ' + (i + 1)"
+                      class="slide-img"
+                    />
+                  </picture>
+                  <div class="slide-overlay"></div>
+                </div>
+
+                @if (banner.title || banner.subtitle || banner.link_url) {
+                  <div class="slide-content">
+                    @if (banner.title) {
+                      <h2 class="slide-title">{{ banner.title }}</h2>
+                    }
+                    @if (banner.subtitle) {
+                      <p class="slide-subtitle">{{ banner.subtitle }}</p>
+                    }
+                    @if (banner.link_url) {
+                      <a
+                        mat-flat-button
+                        color="primary"
+                        [href]="banner.link_url"
+                        [target]="banner.target"
+                        rel="noopener noreferrer"
+                        class="slide-cta"
+                      >
+                        <span>Acessar</span>
+                        <mat-icon>arrow_forward</mat-icon>
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (banners().length > 1) {
+            <button
+              type="button"
+              class="carousel-nav-btn prev-btn"
+              (click)="prevSlide()"
+              aria-label="Slide anterior"
+            >
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="carousel-nav-btn next-btn"
+              (click)="nextSlide()"
+              aria-label="Próximo slide"
+            >
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+
+            <div class="carousel-dots" role="tablist" aria-label="Controle de slides">
+              @for (banner of banners(); track banner.uuid; let i = $index) {
+                <button
+                  type="button"
+                  class="carousel-dot"
+                  [class.active]="i === currentSlide()"
+                  (click)="goToSlide(i)"
+                  [attr.aria-label]="'Ir para o slide ' + (i + 1)"
+                  role="tab"
+                  [attr.aria-selected]="i === currentSlide()"
+                ></button>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Fallback Hero quando não há banners cadastrados -->
+        <div class="fallback-hero">
+          <div class="hero-content">
+            <span class="hero-badge">Plataforma Ativa</span>
+            <h1 class="hero-title">Bem-vindo a {{ tenantContext.tenantDomain() }}</h1>
+            <p class="hero-description">
+              Ambiente moderno, veloz e integrado com arquitetura headless multi-tenant.
+            </p>
+            <div class="hero-actions">
+              <a mat-flat-button color="primary" routerLink="/auth/login" class="hero-cta">
+                <mat-icon>lock_open</mat-icon>
+                <span>Acessar Painel</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- Destaques Institucionais -->
+    <section class="features-section" aria-label="Recursos">
+      <div class="features-header">
+        <h2 class="section-title">Nossa Estrutura</h2>
+        <p class="section-subtitle">
+          Tudo o que você precisa em uma infraestrutura moderna e escalável
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <mat-icon>shield</mat-icon>
+          </div>
+          <h3 class="feature-title">Segurança & Isolamento</h3>
+          <p class="feature-text">
+            Banco de dados e configurações totalmente isolados garantindo total privacidade e
+            integridade das informações.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <mat-icon>palette</mat-icon>
+          </div>
+          <h3 class="feature-title">Identidade Visual Própria</h3>
+          <p class="feature-text">
+            Cores da marca, logotipo e personalizações visuais aplicadas em tempo real com suporte a
+            temas.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <mat-icon>speed</mat-icon>
+          </div>
+          <h3 class="feature-title">Alta Performance</h3>
+          <p class="feature-text">
+            API otimizada com cache inteligente, tempos de resposta ultrarrápidos e interface
+            reativa com Signals.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé Público -->
+  <footer class="public-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <strong>{{ tenantContext.tenantDomain() }}</strong>
+        <span>© {{ currentYear }} • Todos os direitos reservados.</span>
+      </div>
+      <div class="footer-links">
+        <a routerLink="/auth/login" class="footer-link">Área Administrativa</a>
+      </div>
+    </div>
+  </footer>
+</div>

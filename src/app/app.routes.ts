@@ -14,7 +14,7 @@ import { tenantAuthGuard } from './features/tenant/auth/guards/tenant-auth.guard
 import { tenantGuestGuard } from './features/tenant/auth/guards/tenant-guest.guard';
 
 // O mesmo build atende o central e os tenants: a raiz depende do domínio acessado
-const contextHome = () => (inject(TenantContextService).isTenant() ? 'painel' : 'admin/tenants');
+const contextHome = () => (inject(TenantContextService).isTenant() ? '' : 'admin/tenants');
 
 /** Rotas de usuários (lista, criação e edição), iguais no central e no tenant. */
 function userRoutes(config: UserManagementConfig, fallbackUrl: string): Routes {
@@ -174,6 +174,15 @@ export const routes: Routes = [
           ),
       },
     ],
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    canMatch: [() => inject(TenantContextService).isTenant()],
+    loadComponent: () =>
+      import('./features/tenant/public-home/pages/public-home/public-home.component').then(
+        (m) => m.PublicHomeComponent,
+      ),
   },
   {
     path: '',

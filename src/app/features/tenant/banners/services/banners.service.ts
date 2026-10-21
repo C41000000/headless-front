@@ -21,6 +21,12 @@ export class BannersService {
     return this.http.get<BannerDto[]>('/api/v1/admin/banners', { params });
   }
 
+  /** Lista banners públicos ativos e dentro da vigência programada (sem autenticação). */
+  public getPublicBanners(placement = 'home'): Observable<BannerDto[]> {
+    const params = new HttpParams().set('placement', placement);
+    return this.http.get<BannerDto[]>('/api/v1/banners', { params });
+  }
+
   public getBanner(uuid: string): Observable<BannerDto> {
     return this.http.get<BannerDto>(`/api/v1/admin/banners/${uuid}`);
   }
